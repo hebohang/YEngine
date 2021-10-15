@@ -1,4 +1,4 @@
-
+#include "pch.h"
 #include "d3dUtil.h"
 #include <comdef.h>
 #include <fstream>

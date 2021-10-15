@@ -2,6 +2,7 @@
 // d3dApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
+#include "pch.h"
 #include "d3dApp.h"
 #include <WindowsX.h>
 
