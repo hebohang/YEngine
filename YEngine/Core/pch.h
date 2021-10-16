@@ -36,3 +36,7 @@
 #include <assimp/mesh.h>
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
+
+// Math header files.
+#include "VectorMath.h"
+#include "Common.h"
