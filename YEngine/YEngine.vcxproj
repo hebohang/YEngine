@@ -91,6 +91,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -139,6 +140,7 @@
       <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>

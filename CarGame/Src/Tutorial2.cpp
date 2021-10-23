@@ -22,14 +22,6 @@ using namespace Microsoft::WRL;
 
 using namespace DirectX;
 
-
-// Clamp a value between a min and max range.
-template<typename T>
-constexpr const T& clamp(const T& val, const T& min, const T& max)
-{
-    return val < min ? min : val > max ? max : val;
-}
-
 // Vertex data for a colored cube.
 struct VertexPosColor
 {
@@ -431,7 +423,7 @@ void Tutorial2::OnKeyPressed(KeyEventArgs& e)
 void Tutorial2::OnMouseWheel(MouseWheelEventArgs& e)
 {
     m_FoV -= e.WheelDelta;
-    m_FoV = clamp(m_FoV, 12.0f, 90.0f);
+    m_FoV = std::clamp(m_FoV, 12.0f, 90.0f);
 
     char buffer[256];
     sprintf_s(buffer, "FoV: %f\n", m_FoV);
