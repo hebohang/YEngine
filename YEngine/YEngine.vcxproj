@@ -88,8 +88,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Core;$(SolutionDir)YEngine\Math</AdditionalIncludeDirectories>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -136,8 +136,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Core;$(SolutionDir)YEngine\Math</AdditionalIncludeDirectories>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
     <Link>
@@ -179,32 +179,16 @@
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Core\Camera.cpp" />
-    <ClCompile Include="Core\d3dApp.cpp" />
-    <ClCompile Include="Core\d3dUtil.cpp" />
-    <ClCompile Include="Core\DDSTextureLoader.cpp" />
-    <ClCompile Include="Core\GameTimer.cpp" />
-    <ClCompile Include="Core\GeometryGenerator.cpp" />
-    <ClCompile Include="Core\MathHelper.cpp" />
-    <ClCompile Include="Core\pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="Math\Random.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Core\Camera.h" />
-    <ClInclude Include="Core\d3dApp.h" />
-    <ClInclude Include="Core\d3dUtil.h" />
-    <ClInclude Include="Core\d3dx12.h" />
-    <ClInclude Include="Core\DDSTextureLoader.h" />
-    <ClInclude Include="Core\GameTimer.h" />
-    <ClInclude Include="Core\GeometryGenerator.h" />
-    <ClInclude Include="Core\MathHelper.h" />
-    <ClInclude Include="Core\pch.h" />
-    <ClInclude Include="Core\UploadBuffer.h" />
+    <ClInclude Include="Common\Camera.h" />
+    <ClInclude Include="Common\d3dApp.h" />
+    <ClInclude Include="Common\d3dUtil.h" />
+    <ClInclude Include="Common\d3dx12.h" />
+    <ClInclude Include="Common\DDSTextureLoader.h" />
+    <ClInclude Include="Common\GameTimer.h" />
+    <ClInclude Include="Common\GeometryGenerator.h" />
+    <ClInclude Include="Common\MathHelper.h" />
+    <ClInclude Include="Common\pch.h" />
+    <ClInclude Include="Common\UploadBuffer.h" />
     <ClInclude Include="Math\BoundingPlane.h" />
     <ClInclude Include="Math\BoundingSphere.h" />
     <ClInclude Include="Math\Common.h" />
@@ -216,9 +200,48 @@
     <ClInclude Include="Math\Transform.h" />
     <ClInclude Include="Math\Vector.h" />
     <ClInclude Include="Math\VectorMath.h" />
+    <ClInclude Include="src\Core\Application.h" />
+    <ClInclude Include="src\Core\CommandQueue.h" />
+    <ClInclude Include="src\Core\Events.h" />
+    <ClInclude Include="src\Core\Game.h" />
+    <ClInclude Include="src\Core\Helpers.h" />
+    <ClInclude Include="src\Core\HighResolutionClock.h" />
+    <ClInclude Include="src\Core\KeyCodes.h" />
+    <ClInclude Include="src\Core\Window.h" />
+    <ClInclude Include="src\Math\BoundingPlane.h" />
+    <ClInclude Include="src\Math\BoundingSphere.h" />
+    <ClInclude Include="src\Math\Common.h" />
+    <ClInclude Include="src\Math\Matrix3.h" />
+    <ClInclude Include="src\Math\Matrix4.h" />
+    <ClInclude Include="src\Math\Quaternion.h" />
+    <ClInclude Include="src\Math\Random.h" />
+    <ClInclude Include="src\Math\Scalar.h" />
+    <ClInclude Include="src\Math\Transform.h" />
+    <ClInclude Include="src\Math\Vector.h" />
+    <ClInclude Include="src\Math\VectorMath.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\Functions.inl" />
+    <None Include="src\Math\Functions.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Common\Camera.cpp" />
+    <ClCompile Include="Common\d3dApp.cpp" />
+    <ClCompile Include="Common\d3dUtil.cpp" />
+    <ClCompile Include="Common\DDSTextureLoader.cpp" />
+    <ClCompile Include="Common\GameTimer.cpp" />
+    <ClCompile Include="Common\GeometryGenerator.cpp" />
+    <ClCompile Include="Common\MathHelper.cpp" />
+    <ClCompile Include="Common\pch.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="src\Core\Application.cpp" />
+    <ClCompile Include="src\Core\CommandQueue.cpp" />
+    <ClCompile Include="src\Core\Game.cpp" />
+    <ClCompile Include="src\Core\HighResolutionClock.cpp" />
+    <ClCompile Include="src\Core\Window.cpp" />
+    <ClCompile Include="src\Math\Random.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
