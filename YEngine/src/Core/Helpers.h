@@ -28,6 +28,9 @@
  *  @brief Helper functions.
  */
 
+
+// ¸¨Öúº¯ÊýºÍºê
+
 #pragma once
 
 #define WIN32_LEAN_AND_MEAN
