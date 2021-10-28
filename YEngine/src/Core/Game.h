@@ -31,6 +31,11 @@ public:
         return m_Height;
     }
 
+    float GetAspectRatio() const
+    {
+        return static_cast<float>(m_Width / m_Height);
+    }
+
     /**
      *  Initialize the DirectX Runtime.
      */
