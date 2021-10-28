@@ -72,6 +72,21 @@ public:
 	// After modifying camera position/orientation, call to rebuild the view matrix.
 	void UpdateViewMatrix();
 
+	bool IsActive()
+	{
+		return bActive;
+	}
+
+	void Active()
+	{
+		bActive = true;
+	}
+
+	void UnActive()
+	{
+		bActive = false;
+	}
+
 private:
 
 	// Camera coordinate system with coordinates relative to world space.
@@ -93,6 +108,9 @@ private:
 	// Cache View/Proj matrices.
 	DirectX::XMFLOAT4X4 mView = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 mProj = MathHelper::Identity4x4();
+
+	// If the Camera is using
+	bool bActive = false;
 };
 
 #endif // CAMERA_H

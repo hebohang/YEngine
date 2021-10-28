@@ -142,6 +142,36 @@ public:
     int LineNumber = -1;
 };
 
+namespace YVertexUtil
+{
+    struct Vertex
+    {
+        DirectX::XMFLOAT3 Pos;
+        DirectX::XMFLOAT3 Normal;
+        DirectX::XMFLOAT2 TexC;
+        DirectX::XMFLOAT3 TangentU;
+    };
+
+    struct SkinnedVertex
+    {
+        DirectX::XMFLOAT3 Pos;
+        DirectX::XMFLOAT3 Normal;
+        DirectX::XMFLOAT2 TexC;
+        DirectX::XMFLOAT3 TangentU;
+        DirectX::XMFLOAT3 BoneWeights;
+        BYTE BoneIndices[4];
+    };
+}
+
+struct Subset
+{
+    UINT Id = -1;
+    UINT VertexStart = 0;
+    UINT VertexCount = 0;
+    UINT FaceStart = 0;
+    UINT FaceCount = 0;
+};
+
 // Defines a subrange of geometry in a MeshGeometry.  This is for when multiple
 // geometries are stored in one vertex and index buffer.  It provides the offsets
 // and data needed to draw a subset of geometry stores in the vertex and index 

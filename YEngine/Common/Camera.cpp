@@ -226,6 +226,7 @@ void Camera::RotateY(float angle)
 
 void Camera::UpdateViewMatrix()
 {
+	assert(bActive);
 	if(mViewDirty)
 	{
 		XMVECTOR R = XMLoadFloat3(&mRight);
