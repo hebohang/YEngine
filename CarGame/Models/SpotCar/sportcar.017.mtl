@@ -1,0 +1,55 @@
+# Blender MTL File: 'sportcar.017.blend'
+# Material Count: 4
+
+newmtl Body
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd sportcar.017_Body_BaseColor.png
+map_Ns sportcar.017_Body_Roughness.png
+refl sportcar.017_Body_Metallic.png
+
+newmtl Glass
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 0.775000
+illum 9
+map_Kd sportcar.017_Glass_BaseColor.png
+map_Ns sportcar.017_Glass_Roughness.png
+map_d sportcar.017_Glass_BaseColor.png
+refl sportcar.017_Glass_Metallic.png
+
+newmtl Interior
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd sportcar.017_Interior_BaseColor.png
+map_Ns sportcar.017_Interior_Roughness.png
+refl sportcar.017_Interior_Metallic.png
+
+newmtl Wheels
+Ns 225.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd sportcar.017_Wheels_BaseColor.png
+map_Ns sportcar.017_Wheels_Roughness.png
+refl sportcar.017_Wheels_Metallic.png
