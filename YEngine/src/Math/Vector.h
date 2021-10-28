@@ -67,6 +67,11 @@ namespace Math
         INLINE friend Vector3 operator* ( float   v1, Vector3 v2 ) { return Scalar(v1) * v2; }
         INLINE friend Vector3 operator/ ( float   v1, Vector3 v2 )     { return Scalar(v1) / v2; }
 
+        INLINE Vector3 Length() { return Vector3(DirectX::XMVector3Length(m_vec)); }
+        INLINE float Max() {
+            return max(max(this->GetX().operator float(), this->GetY().operator float()), this->GetZ().operator float());
+        }
+
     protected:
         XMVECTOR m_vec;
     };
