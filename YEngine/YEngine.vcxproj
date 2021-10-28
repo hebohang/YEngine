@@ -88,7 +88,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core;$(SolutionDir)YEngine\src\Render;$(SolutionDir)YEngine\src\LoadModel;$(SolutionDir)YEngine\src\Model</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -137,7 +137,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>false</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core;$(SolutionDir)YEngine\src\Render;$(SolutionDir)YEngine\src\LoadModel;$(SolutionDir)YEngine\src\Model;$(SolutionDir)YEngine\src\Physics</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -188,6 +188,7 @@
     <ClInclude Include="Common\DDSTextureLoader.h" />
     <ClInclude Include="Common\GameTimer.h" />
     <ClInclude Include="Common\GeometryGenerator.h" />
+    <ClInclude Include="Common\MacroDefines.h" />
     <ClInclude Include="Common\MathHelper.h" />
     <ClInclude Include="Common\pch.h" />
     <ClInclude Include="Common\UploadBuffer.h" />
@@ -210,8 +211,9 @@
     <ClInclude Include="src\Core\HighResolutionClock.h" />
     <ClInclude Include="src\Core\KeyCodes.h" />
     <ClInclude Include="src\Core\Window.h" />
-    <ClInclude Include="src\Math\BoundingPlane.h" />
-    <ClInclude Include="src\Math\BoundingSphere.h" />
+    <ClInclude Include="src\LoadModel\LoadFbx.h" />
+    <ClInclude Include="src\LoadModel\LoadM3d.h" />
+    <ClInclude Include="src\LoadModel\SkinnedData.h" />
     <ClInclude Include="src\Math\Common.h" />
     <ClInclude Include="src\Math\Matrix3.h" />
     <ClInclude Include="src\Math\Matrix4.h" />
@@ -221,6 +223,21 @@
     <ClInclude Include="src\Math\Transform.h" />
     <ClInclude Include="src\Math\Vector.h" />
     <ClInclude Include="src\Math\VectorMath.h" />
+    <ClInclude Include="src\Model\Model.h" />
+    <ClInclude Include="src\Model\SkinnedModel.h" />
+    <ClInclude Include="src\Physics\aabb.h" />
+    <ClInclude Include="src\Physics\boundingSphere.h" />
+    <ClInclude Include="src\Physics\collider.h" />
+    <ClInclude Include="src\Physics\intersectData.h" />
+    <ClInclude Include="src\Physics\physicsEngine.h" />
+    <ClInclude Include="src\Physics\physicsObject.h" />
+    <ClInclude Include="src\Physics\plane.h" />
+    <ClInclude Include="src\Render\FrameResource.h" />
+    <ClInclude Include="src\Render\RenderGraph.h" />
+    <ClInclude Include="src\Render\ShadowMap.h" />
+    <ClInclude Include="src\Render\Ssao.h" />
+    <ClInclude Include="src\Render\StaticSamplersHelper.h" />
+    <ClInclude Include="src\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Math\Functions.inl" />
@@ -243,7 +260,21 @@
     <ClCompile Include="src\Core\Game.cpp" />
     <ClCompile Include="src\Core\HighResolutionClock.cpp" />
     <ClCompile Include="src\Core\Window.cpp" />
+    <ClCompile Include="src\LoadModel\LoadFbx.cpp" />
+    <ClCompile Include="src\LoadModel\LoadM3d.cpp" />
+    <ClCompile Include="src\LoadModel\SkinnedData.cpp" />
     <ClCompile Include="src\Math\Random.cpp" />
+    <ClCompile Include="src\Model\Model.cpp" />
+    <ClCompile Include="src\Model\SkinnedModel.cpp" />
+    <ClCompile Include="src\Physics\aabb.cpp" />
+    <ClCompile Include="src\Physics\boundingSphere.cpp" />
+    <ClCompile Include="src\Physics\collider.cpp" />
+    <ClCompile Include="src\Physics\physicsEngine.cpp" />
+    <ClCompile Include="src\Physics\physicsObject.cpp" />
+    <ClCompile Include="src\Physics\plane.cpp" />
+    <ClCompile Include="src\Render\FrameResource.cpp" />
+    <ClCompile Include="src\Render\ShadowMap.cpp" />
+    <ClCompile Include="src\Render\Ssao.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
