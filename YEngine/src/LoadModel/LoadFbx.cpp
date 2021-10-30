@@ -4,7 +4,7 @@
 bool FbxLoader::LoadFbx(const std::string& filename, SkinnedData& skinInfo)
 {
 	Assimp::Importer importer;
-	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals);
+	const aiScene* scene = importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_FixInfacingNormals);
 
 	ProcessNode(scene, scene->mRootNode);
 	
@@ -27,8 +27,8 @@ void FbxLoader::ProcessNode(const aiScene* scene, aiNode* node)
 
 FbxMesh FbxLoader::ProcessMesh(const aiScene* scene, aiMesh* ai_mesh)
 {
-	std::vector<SkinnedVertex> vertices;
-	std::vector<UINT> indices;
+	std::vector<Vertex> vertices;
+	std::vector<int32_t> indices;
 	Subset subset;
 	
 	// TODO Bone
@@ -37,7 +37,7 @@ FbxMesh FbxLoader::ProcessMesh(const aiScene* scene, aiMesh* ai_mesh)
 
 	for (size_t i = 0; i < ai_mesh->mNumVertices; i++) 
 	{
-		SkinnedVertex vertex;
+		Vertex vertex;
 		vertex.Pos.x = ai_mesh->mVertices[i].x;
 		vertex.Pos.y = ai_mesh->mVertices[i].y;
 		vertex.Pos.z = ai_mesh->mVertices[i].z;
@@ -46,15 +46,18 @@ FbxMesh FbxLoader::ProcessMesh(const aiScene* scene, aiMesh* ai_mesh)
 		vertex.Normal.y = ai_mesh->mNormals[i].y;
 		vertex.Normal.z = ai_mesh->mNormals[i].z;
 
-		if (ai_mesh->mTextureCoords[0])
-		{
-			vertex.TexC.x = ai_mesh->mTextureCoords[0][i].x;
-			vertex.TexC.y = ai_mesh->mTextureCoords[0][i].y;
-		}
-		else 
-		{
-			vertex.TexC = { 0.0f, 0.0f };
-		}
+		vertex.TexC.x = ai_mesh->mTextureCoords[0][i].x;
+		vertex.TexC.y = ai_mesh->mTextureCoords[0][i].y;
+
+		//if (ai_mesh->mTextureCoords[0])
+		//{
+		//	vertex.TexC.x = ai_mesh->mTextureCoords[0][i].x;
+		//	vertex.TexC.y = ai_mesh->mTextureCoords[0][i].y;
+		//}
+		//else 
+		//{
+		//	vertex.TexC = { 0.0f, 0.0f };
+		//}
 
 		// TODO Bone
 		//vertex.BoneWeights.x = vertexBoneData[i].weights[0];
@@ -75,13 +78,7 @@ FbxMesh FbxLoader::ProcessMesh(const aiScene* scene, aiMesh* ai_mesh)
 	}
 
 	// TODO Material
-	SetupMeshMaterial(ai_mesh);
-	//std::vector<UINT> diffuseMaps;
-	//if (mesh->mMaterialIndex >= 0) {
-	//	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
-	//	diffuseMaps = LoadMaterialTextures(material, aiTextureType_DIFFUSE);
-	//}
-	//UINT materialIndex = SetupMaterial(diffuseMaps);
+	SetupMeshMaterial(scene, ai_mesh);
 
 	SubsetId++;
 	subset.Id = SubsetId;
@@ -108,12 +105,23 @@ void FbxLoader::LoadBones(const aiMesh* mesh)
 	}
 }
 
-void FbxLoader::SetupMeshMaterial(const aiMesh* mesh)
+void FbxLoader::SetupMeshMaterial(const aiScene* scene, const aiMesh* mesh)
 {
 	// TODO
 	// just for test
 	FbxMaterial this_material;
-	this_material.Name = "hbh";
+	this_material.Name = "hbh" + std::to_string(SubsetId);
+
+	if (mesh->mMaterialIndex >= 0) {
+		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		aiString str;
+		if (material->GetTextureCount(aiTextureType_DIFFUSE))
+		{
+			material->GetTexture(aiTextureType_DIFFUSE, 0, &str);
+			this_material.DiffuseMapName = str.C_Str();
+		}
+	}
+
 	mats.push_back(this_material);
 }
 

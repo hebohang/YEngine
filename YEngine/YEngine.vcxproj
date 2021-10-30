@@ -148,10 +148,10 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Lib>
-      <AdditionalDependencies>assimp-vc142-mtd.lib</AdditionalDependencies>
+      <AdditionalDependencies>assimp-vc142-mtd.lib;DirectXTex.lib</AdditionalDependencies>
     </Lib>
     <Lib>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Assimp\lib</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Assimp\lib;$(SolutionDir)Dependencies\DirectXTex\lib</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -192,6 +192,7 @@
     <ClInclude Include="Common\MathHelper.h" />
     <ClInclude Include="Common\pch.h" />
     <ClInclude Include="Common\UploadBuffer.h" />
+    <ClInclude Include="Common\WICTextureLoader12.h" />
     <ClInclude Include="Math\BoundingPlane.h" />
     <ClInclude Include="Math\BoundingSphere.h" />
     <ClInclude Include="Math\Common.h" />
@@ -204,6 +205,7 @@
     <ClInclude Include="Math\Vector.h" />
     <ClInclude Include="Math\VectorMath.h" />
     <ClInclude Include="src\Core\Application.h" />
+    <ClInclude Include="src\Core\CommandListHelper.h" />
     <ClInclude Include="src\Core\CommandQueue.h" />
     <ClInclude Include="src\Core\Events.h" />
     <ClInclude Include="src\Core\Game.h" />
@@ -213,6 +215,7 @@
     <ClInclude Include="src\Core\Window.h" />
     <ClInclude Include="src\LoadModel\LoadFbx.h" />
     <ClInclude Include="src\LoadModel\LoadM3d.h" />
+    <ClInclude Include="src\LoadModel\LoadTextureHelper.h" />
     <ClInclude Include="src\LoadModel\SkinnedData.h" />
     <ClInclude Include="src\Math\Common.h" />
     <ClInclude Include="src\Math\Matrix3.h" />
@@ -255,13 +258,16 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Common\WICTextureLoader12.cpp" />
     <ClCompile Include="src\Core\Application.cpp" />
+    <ClCompile Include="src\Core\CommandListHelper.cpp" />
     <ClCompile Include="src\Core\CommandQueue.cpp" />
     <ClCompile Include="src\Core\Game.cpp" />
     <ClCompile Include="src\Core\HighResolutionClock.cpp" />
     <ClCompile Include="src\Core\Window.cpp" />
     <ClCompile Include="src\LoadModel\LoadFbx.cpp" />
     <ClCompile Include="src\LoadModel\LoadM3d.cpp" />
+    <ClCompile Include="src\LoadModel\LoadTextureHelper.cpp" />
     <ClCompile Include="src\LoadModel\SkinnedData.cpp" />
     <ClCompile Include="src\Math\Random.cpp" />
     <ClCompile Include="src\Model\Model.cpp" />

@@ -13,11 +13,11 @@
 
 struct FbxMesh
 {
-    std::vector<SkinnedVertex> vertices;
-    std::vector<UINT> indices;
+    std::vector<Vertex> vertices;
+    std::vector<int32_t> indices;
     UINT MaterialIndex;
 
-    FbxMesh(std::vector<SkinnedVertex>& vertices, std::vector<UINT>& indices, UINT MaterialIndex)
+    FbxMesh(std::vector<Vertex>& vertices, std::vector<int32_t>& indices, UINT MaterialIndex)
         :vertices(vertices), indices(indices), MaterialIndex(MaterialIndex)
     {
 
@@ -46,8 +46,8 @@ public:
 
     std::vector<FbxMaterial> mats;
     std::vector<FbxMesh> FbxMeshes;
-    std::vector<SkinnedVertex> FbxVertices;
-    std::vector<USHORT> FbxIndices;
+    std::vector<Vertex> FbxVertices;
+    std::vector<int32_t> FbxIndices;
     std::vector<Subset> FbxSubsets;
     SkinnedData FbxSkinnedData;
 
@@ -57,5 +57,5 @@ private:
     void ProcessNode(const aiScene* scene, aiNode* node);
     FbxMesh ProcessMesh(const aiScene* scene, aiMesh* ai_mesh);
     void LoadBones(const aiMesh* mesh);
-    void SetupMeshMaterial(const aiMesh* mesh);
+    void SetupMeshMaterial(const aiScene* scene, const aiMesh* mesh);
 };
