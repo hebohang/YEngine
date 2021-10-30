@@ -5,12 +5,16 @@
 #include "SkinnedMeshApp.h"
 #include "StaticSamplersHelper.h"
 #include "LoadFbx.h"
+#include "WICTextureLoader12.h"
+#include "LoadTextureHelper.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
 using namespace DirectX::PackedVector;
 
 const int gNumFrameResources = 3;
+
+
 
 SkinnedMeshApp::SkinnedMeshApp(HINSTANCE hInstance)
     : D3DApp(hInstance)
@@ -336,7 +340,7 @@ void SkinnedMeshApp::UpdateSkinnedCBs(const GameTimer& gt)
     auto currSkinnedCB = mCurrFrameResource->SkinnedCB.get();
    
     // We only have one skinned model being animated.
-    mSkinnedModelInst->UpdateSkinnedAnimation(gt.DeltaTime());
+    // mSkinnedModelInst->UpdateSkinnedAnimation(gt.DeltaTime());
         
     SkinnedConstants skinnedConstants;
     std::copy(
@@ -568,35 +572,42 @@ void SkinnedMeshApp::LoadTextures()
 	
 	std::vector<std::wstring> texFilenames = 
 	{
-		L"../../Textures/bricks2.dds",
-		L"../../Textures/bricks2_nmap.dds",
-		L"../../Textures/tile.dds",
-		L"../../Textures/tile_nmap.dds",
-		L"../../Textures/white1x1.dds",
-		L"../../Textures/default_nmap.dds",
-		L"../../Textures/desertcube1024.dds"
+		L"Textures/bricks2.dds",
+		L"Textures/bricks2_nmap.dds",
+		L"Textures/tile.dds",
+        // L"Textures/sportcar.017_Body_BaseColor.png",
+
+		L"Textures/tile_nmap.dds",
+		L"Textures/white1x1.dds",
+		L"Textures/default_nmap.dds",
+		L"Textures/desertcube1024.dds"
 	};
 
     // Add skinned model textures to list so we can reference by name later.
     for(UINT i = 0; i < mSkinnedMats.size(); ++i)
     {
         std::string diffuseName = mSkinnedMats[i].DiffuseMapName;
-        std::string normalName = mSkinnedMats[i].NormalMapName;
+        // std::string normalName = mSkinnedMats[i].NormalMapName;
 
-        std::wstring diffuseFilename = L"../../Textures/" + AnsiToWString(diffuseName);
-        std::wstring normalFilename = L"../../Textures/" + AnsiToWString(normalName);
+        if (diffuseName.size() == 0)
+        {
+            continue;
+        }
+
+        std::wstring diffuseFilename = L"Models/SpotCar/" + AnsiToWString(diffuseName);
+        // std::wstring normalFilename = L"../../Textures/" + AnsiToWString(normalName);
 
         // strip off extension
         diffuseName = diffuseName.substr(0, diffuseName.find_last_of("."));
-        normalName = normalName.substr(0, normalName.find_last_of("."));
+        // normalName = normalName.substr(0, normalName.find_last_of("."));
 
         mSkinnedTextureNames.push_back(diffuseName);
         texNames.push_back(diffuseName);
         texFilenames.push_back(diffuseFilename);
 
-        mSkinnedTextureNames.push_back(normalName);
-        texNames.push_back(normalName);
-        texFilenames.push_back(normalFilename);
+        // mSkinnedTextureNames.push_back(normalName);
+        // texNames.push_back(normalName);
+        // texFilenames.push_back(normalFilename);
     }
 	
 	for(int i = 0; i < (int)texNames.size(); ++i)
@@ -607,10 +618,20 @@ void SkinnedMeshApp::LoadTextures()
             auto texMap = std::make_unique<Texture>();
             texMap->Name = texNames[i];
             texMap->Filename = texFilenames[i];
-            ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
-                mCommandList.Get(), texMap->Filename.c_str(),
-                texMap->Resource, texMap->UploadHeap));
-
+            // 如果不是dds格式的，就用WIC方法加载
+            if (texFilenames[i].find(L"dds") == std::string::npos)
+            {
+                CreateWICTextureFromFile12(md3dDevice.Get(),
+                    mCommandList.Get(), texMap->Filename.c_str(),
+                    texMap->Resource, texMap->UploadHeap);
+            }
+            else
+            {
+                ThrowIfFailed(DirectX::CreateDDSTextureFromFile12(md3dDevice.Get(),
+                    mCommandList.Get(), texMap->Filename.c_str(),
+                    texMap->Resource, texMap->UploadHeap));
+            }
+            
             mTextures[texMap->Name] = std::move(texMap);
         }
 	}		
@@ -1038,19 +1059,20 @@ void SkinnedMeshApp::BuildShapeGeometry()
 
 void SkinnedMeshApp::LoadSkinnedModel()
 {
-	std::vector<SkinnedVertex> vertices;
-	std::vector<std::uint16_t> indices;	
+	//std::vector<SkinnedVertex> vertices;
+	//std::vector<std::uint16_t> indices;	
  
-	M3DLoader m3dLoader;
-	m3dLoader.LoadM3d(mSkinnedModelFilename, vertices, indices, 
-        mSkinnedSubsets, mSkinnedMats, mSkinnedInfo);
+	//M3DLoader m3dLoader;
+	//m3dLoader.LoadM3d(mSkinnedModelFilename, vertices, indices, 
+ //       mSkinnedSubsets, mSkinnedMats, mSkinnedInfo);
 
-    //FbxLoader fbxloader;
-    //fbxloader.LoadFbx(mSkinnedModelFilename, mSkinnedMats, mSkinnedInfo);
+    FbxLoader fbxloader;
+    fbxloader.LoadFbx(mSkinnedModelFilename, mSkinnedInfo);
 
-    //std::vector<SkinnedVertex> vertices = fbxloader.FbxVertices;
-    //std::vector<std::uint16_t> indices = fbxloader.FbxIndices;
-    //mSkinnedSubsets = fbxloader.FbxSubsets;
+    std::vector<Vertex> vertices = fbxloader.FbxVertices;
+    std::vector<std::int32_t> indices = fbxloader.FbxIndices;
+    mSkinnedSubsets = fbxloader.FbxSubsets;
+    mSkinnedMats = fbxloader.mats;
 
     mSkinnedModelInst = std::make_unique<SkinnedModelInstance>();
     mSkinnedModelInst->SkinnedInfo = &mSkinnedInfo;
@@ -1058,8 +1080,8 @@ void SkinnedMeshApp::LoadSkinnedModel()
     mSkinnedModelInst->ClipName = "Take1";
     mSkinnedModelInst->TimePos = 0.0f;
  
-	const UINT vbByteSize = (UINT)vertices.size() * sizeof(SkinnedVertex);
-    const UINT ibByteSize = (UINT)indices.size()  * sizeof(std::uint16_t);
+	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+    const UINT ibByteSize = (UINT)indices.size()  * sizeof(std::int32_t);
 
 	auto geo = std::make_unique<MeshGeometry>();
 	geo->Name = mSkinnedModelFilename;
@@ -1076,9 +1098,9 @@ void SkinnedMeshApp::LoadSkinnedModel()
 	geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
 		mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
 
-	geo->VertexByteStride = sizeof(SkinnedVertex);
+	geo->VertexByteStride = sizeof(Vertex);
 	geo->VertexBufferByteSize = vbByteSize;
-	geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+	geo->IndexFormat = DXGI_FORMAT_R32_UINT;
 	geo->IndexBufferByteSize = ibByteSize;
 
 	for(UINT i = 0; i < (UINT)mSkinnedSubsets.size(); ++i)
@@ -1454,21 +1476,21 @@ void SkinnedMeshApp::BuildRenderItems()
         auto ritem = std::make_unique<RenderItem>();
 
         // Reflect to change coordinate system from the RHS the data was exported out as.
-        XMMATRIX modelScale = XMMatrixScaling(0.05f, 0.05f, -0.05f);
-        XMMATRIX modelRot = XMMatrixRotationY(MathHelper::Pi);
-        XMMATRIX modelOffset = XMMatrixTranslation(0.0f, 0.0f, -5.0f);
+        XMMATRIX modelScale = XMMatrixScaling(10.01f, 10.01f, -10.01f);
+        XMMATRIX modelRot = XMMatrixRotationX(MathHelper::Pi / 2 * 3);
+        XMMATRIX modelOffset = XMMatrixTranslation(0.0f, 0.0f, -28.0f);
         XMStoreFloat4x4(&ritem->World, modelScale*modelRot*modelOffset);
 
-        if (i == mSkinnedMats.size() >> 2)
-        {
-            XMStoreFloat4x4(&mSkinnedModelInst->World, modelScale * modelRot * modelOffset);
-            mSkinnedModelInst->ModelCamera.LookAt(
-                XMFLOAT3(mSkinnedModelInst->World.m[3][0], mSkinnedModelInst->World.m[3][1] + 5.0f, mSkinnedModelInst->World.m[3][2] + 3.0f),
-                // XMFLOAT3(0.0f, 0.0f, 1.0f),
-                XMFLOAT3(mSkinnedModelInst->World.m[3][0], mSkinnedModelInst->World.m[3][1], mSkinnedModelInst->World.m[3][2]),
-                XMFLOAT3(0.0f, 1.0f, 0.0f)
-            );
-        }
+        //if (i == mSkinnedMats.size() >> 2)
+        //{
+        //    XMStoreFloat4x4(&mSkinnedModelInst->World, modelScale * modelRot * modelOffset);
+        //    mSkinnedModelInst->ModelCamera.LookAt(
+        //        XMFLOAT3(mSkinnedModelInst->World.m[3][0], mSkinnedModelInst->World.m[3][1] + 5.0f, mSkinnedModelInst->World.m[3][2] + 3.0f),
+        //        // XMFLOAT3(0.0f, 0.0f, 1.0f),
+        //        XMFLOAT3(mSkinnedModelInst->World.m[3][0], mSkinnedModelInst->World.m[3][1], mSkinnedModelInst->World.m[3][2]),
+        //        XMFLOAT3(0.0f, 1.0f, 0.0f)
+        //    );
+        //}
 
         ritem->TexTransform = MathHelper::Identity4x4();
         ritem->ObjCBIndex = objCBIndex++;
@@ -1484,7 +1506,8 @@ void SkinnedMeshApp::BuildRenderItems()
         ritem->SkinnedCBIndex = 0;
         ritem->SkinnedModelInst = mSkinnedModelInst.get();
 
-        mRitemLayer[(int)RenderLayer::SkinnedOpaque].push_back(ritem.get());
+        // mRitemLayer[(int)RenderLayer::SkinnedOpaque].push_back(ritem.get());
+        mRitemLayer[(int)RenderLayer::Opaque].push_back(ritem.get());
         mAllRitems.push_back(std::move(ritem));
     }
 }

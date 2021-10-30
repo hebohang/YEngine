@@ -106,13 +106,14 @@ private:
     PassConstants mShadowPassCB;// index 1 of pass cbuffer.
 
     UINT mSkinnedSrvHeapStart = 0;
-    std::string mSkinnedModelFilename = "Models\\soldier.m3d";
-    //std::string mSkinnedModelFilename = "Models\\SpotCar\\sportcar.017.fbx";
+    // std::string mSkinnedModelFilename = "Models\\soldier.m3d";
+    //std::string mSkinnedModelFilename = "Models\\OpelCar\\Opel_Rekord_Caravan1967.FBX";
+    std::string mSkinnedModelFilename = "Models\\SpotCar\\sportcar.017.fbx";
     std::unique_ptr<SkinnedModelInstance> mSkinnedModelInst;
     SkinnedData mSkinnedInfo;
     std::vector<Subset> mSkinnedSubsets;
-    std::vector<M3DLoader::M3dMaterial> mSkinnedMats;
-    // std::vector<FbxLoader::FbxMaterial> mSkinnedMats;
+    // std::vector<M3DLoader::M3dMaterial> mSkinnedMats;
+    std::vector<FbxLoader::FbxMaterial> mSkinnedMats;
     std::vector<std::string> mSkinnedTextureNames;
 
     Camera mCamera;
