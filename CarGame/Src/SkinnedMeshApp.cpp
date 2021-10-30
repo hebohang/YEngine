@@ -575,8 +575,6 @@ void SkinnedMeshApp::LoadTextures()
 		L"Textures/bricks2.dds",
 		L"Textures/bricks2_nmap.dds",
 		L"Textures/tile.dds",
-        // L"Textures/sportcar.017_Body_BaseColor.png",
-
 		L"Textures/tile_nmap.dds",
 		L"Textures/white1x1.dds",
 		L"Textures/default_nmap.dds",
@@ -595,7 +593,8 @@ void SkinnedMeshApp::LoadTextures()
         }
 
         std::wstring diffuseFilename = L"Models/SpotCar/" + AnsiToWString(diffuseName);
-        // std::wstring normalFilename = L"../../Textures/" + AnsiToWString(normalName);
+        // std::wstring diffuseFilename = L"Models/OpelCar/" + AnsiToWString(diffuseName);
+        //std::wstring normalFilename = L"../../Textures/" + AnsiToWString(normalName);
 
         // strip off extension
         diffuseName = diffuseName.substr(0, diffuseName.find_last_of("."));
@@ -1469,17 +1468,19 @@ void SkinnedMeshApp::BuildRenderItems()
 		mAllRitems.push_back(std::move(rightSphereRitem));
 	}
 
-    for(UINT i = 0; i < mSkinnedMats.size(); ++i)
+    for(UINT i = 0; i < 1; ++i)
     {
         std::string submeshName = "sm_" + std::to_string(i);
 
         auto ritem = std::make_unique<RenderItem>();
 
         // Reflect to change coordinate system from the RHS the data was exported out as.
-        XMMATRIX modelScale = XMMatrixScaling(10.01f, 10.01f, -10.01f);
-        XMMATRIX modelRot = XMMatrixRotationX(MathHelper::Pi / 2 * 3);
-        XMMATRIX modelOffset = XMMatrixTranslation(0.0f, 0.0f, -28.0f);
-        XMStoreFloat4x4(&ritem->World, modelScale*modelRot*modelOffset);
+        //XMMATRIX modelScale = XMMatrixScaling(10.01f, 10.01f, -10.01f);
+        //XMMATRIX modelRot = XMMatrixRotationX(MathHelper::Pi / 2 * 3);
+        //XMMATRIX modelOffset = XMMatrixTranslation(0.0f, 0.0f, -28.0f);
+        //XMStoreFloat4x4(&ritem->World, modelScale*modelRot*modelOffset);
+        XMStoreFloat4x4(&ritem->World, XMMatrixScaling(1.0f, 1.0f, 1.0f) * XMMatrixRotationX(MathHelper::Pi / 2) * XMMatrixTranslation(0.0f, 0.0f, -10.0f));
+        // ritem->World = MathHelper::Identity4x4();
 
         //if (i == mSkinnedMats.size() >> 2)
         //{
