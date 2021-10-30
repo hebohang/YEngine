@@ -42,9 +42,9 @@ public:
     };
 
     bool LoadFbx(const std::string& filename,
-        std::vector<FbxMaterial>& mats,
         SkinnedData& skinInfo);
 
+    std::vector<FbxMaterial> mats;
     std::vector<FbxMesh> FbxMeshes;
     std::vector<SkinnedVertex> FbxVertices;
     std::vector<USHORT> FbxIndices;
@@ -57,4 +57,5 @@ private:
     void ProcessNode(const aiScene* scene, aiNode* node);
     FbxMesh ProcessMesh(const aiScene* scene, aiMesh* ai_mesh);
     void LoadBones(const aiMesh* mesh);
+    void SetupMeshMaterial(const aiMesh* mesh);
 };

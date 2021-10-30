@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "LoadFbx.h"
 
-bool FbxLoader::LoadFbx(const std::string& filename, std::vector<FbxMaterial>& mats, SkinnedData& skinInfo)
+bool FbxLoader::LoadFbx(const std::string& filename, SkinnedData& skinInfo)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filename, aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals);
@@ -33,7 +33,7 @@ FbxMesh FbxLoader::ProcessMesh(const aiScene* scene, aiMesh* ai_mesh)
 	
 	// TODO Bone
 	// std::vector<BoneData> vertexBoneData(mesh->mNumVertices);
-	LoadBones(ai_mesh);
+	// LoadBones(ai_mesh);
 
 	for (size_t i = 0; i < ai_mesh->mNumVertices; i++) 
 	{
@@ -75,6 +75,7 @@ FbxMesh FbxLoader::ProcessMesh(const aiScene* scene, aiMesh* ai_mesh)
 	}
 
 	// TODO Material
+	SetupMeshMaterial(ai_mesh);
 	//std::vector<UINT> diffuseMaps;
 	//if (mesh->mMaterialIndex >= 0) {
 	//	aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
@@ -105,5 +106,14 @@ void FbxLoader::LoadBones(const aiMesh* mesh)
 	{
 
 	}
+}
+
+void FbxLoader::SetupMeshMaterial(const aiMesh* mesh)
+{
+	// TODO
+	// just for test
+	FbxMaterial this_material;
+	this_material.Name = "hbh";
+	mats.push_back(this_material);
 }
 
