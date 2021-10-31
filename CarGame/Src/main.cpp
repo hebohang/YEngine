@@ -1,4 +1,4 @@
-#include "SkinnedMeshApp.h"
+#include "CarGameApp.h"
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
     PSTR cmdLine, int showCmd)
@@ -10,7 +10,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance,
 
     try
     {
-        SkinnedMeshApp theApp(hInstance);
+        CarGameApp theApp(hInstance);
         if (!theApp.Initialize())
             return 0;
 

@@ -12,15 +12,16 @@
 #include "RenderGraph.h"
 #include "SkinnedModel.h"
 #include "LoadFbx.h"
+#include "Model.h"
 
 
-class SkinnedMeshApp : public D3DApp
+class CarGameApp : public D3DApp
 {
 public:
-    SkinnedMeshApp(HINSTANCE hInstance);
-    SkinnedMeshApp(const SkinnedMeshApp& rhs) = delete;
-    SkinnedMeshApp& operator=(const SkinnedMeshApp& rhs) = delete;
-    ~SkinnedMeshApp();
+    CarGameApp(HINSTANCE hInstance);
+    CarGameApp(const CarGameApp& rhs) = delete;
+    CarGameApp& operator=(const CarGameApp& rhs) = delete;
+    ~CarGameApp();
 
     virtual bool Initialize()override;
 
@@ -105,16 +106,16 @@ private:
     PassConstants mMainPassCB;  // index 0 of pass cbuffer.
     PassConstants mShadowPassCB;// index 1 of pass cbuffer.
 
-    UINT mSkinnedSrvHeapStart = 0;
-    // std::string mSkinnedModelFilename = "Models\\soldier.m3d";
-    //std::string mSkinnedModelFilename = "Models\\OpelCar\\Opel_Rekord_Caravan1967.FBX";
-    std::string mSkinnedModelFilename = "Models\\SpotCar\\sportcar.017.fbx";
-    std::unique_ptr<SkinnedModelInstance> mSkinnedModelInst;
+    UINT mPbrSrvHeapStart = 0;
+    // std::string mCarModelFileName = "Models\\soldier.m3d";
+    //std::string mCarModelFileName = "Models\\OpelCar\\Opel_Rekord_Caravan1967.FBX";
+    std::string mCarModelFileName = "Models\\SpotCar\\sportcar.017.fbx";
+    // std::unique_ptr<SkinnedModelInstance> mSkinnedModelInst;
     SkinnedData mSkinnedInfo;
     std::vector<Subset> mSkinnedSubsets;
     // std::vector<M3DLoader::M3dMaterial> mSkinnedMats;
     std::vector<FbxLoader::FbxMaterial> mSkinnedMats;
-    std::vector<std::string> mSkinnedTextureNames;
+    std::vector<std::string> mPbrTextureNames;
 
     Camera mCamera;
     bool bModelCamera = false;
@@ -141,4 +142,6 @@ private:
     XMFLOAT3 mRotatedLightDirections[3];
 
     POINT mLastMousePos;
+
+    YPbrBaseModel mCarModel;
 };

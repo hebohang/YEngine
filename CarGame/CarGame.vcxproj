@@ -169,10 +169,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Src\Main.cpp" />
-    <ClCompile Include="Src\SkinnedMeshApp.cpp" />
+    <ClCompile Include="Src\CarGameApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\SkinnedMeshApp.h" />
+    <ClInclude Include="Src\CarGameApp.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

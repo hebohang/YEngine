@@ -1,8 +1,8 @@
 //***************************************************************************************
-// SkinnedMeshApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
+// CarGameApp.cpp by Frank Luna (C) 2015 All Rights Reserved.
 //***************************************************************************************
 
-#include "SkinnedMeshApp.h"
+#include "CarGameApp.h"
 #include "StaticSamplersHelper.h"
 #include "LoadFbx.h"
 #include "WICTextureLoader12.h"
@@ -16,7 +16,7 @@ const int gNumFrameResources = 3;
 
 
 
-SkinnedMeshApp::SkinnedMeshApp(HINSTANCE hInstance)
+CarGameApp::CarGameApp(HINSTANCE hInstance)
     : D3DApp(hInstance)
 {
     // Estimate the scene bounding sphere manually since we know how the scene was constructed.
@@ -27,13 +27,13 @@ SkinnedMeshApp::SkinnedMeshApp(HINSTANCE hInstance)
     mSceneBounds.Radius = sqrtf(10.0f*10.0f + 15.0f*15.0f);
 }
 
-SkinnedMeshApp::~SkinnedMeshApp()
+CarGameApp::~CarGameApp()
 {
     if(md3dDevice != nullptr)
         FlushCommandQueue();
 }
 
-bool SkinnedMeshApp::Initialize()
+bool CarGameApp::Initialize()
 {
     if(!D3DApp::Initialize())
         return false;
@@ -81,7 +81,7 @@ bool SkinnedMeshApp::Initialize()
     return true;
 }
 
-void SkinnedMeshApp::CreateRtvAndDsvDescriptorHeaps()
+void CarGameApp::CreateRtvAndDsvDescriptorHeaps()
 {
     // Add +1 for screen normal map, +2 for ambient maps.
     D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
@@ -102,7 +102,7 @@ void SkinnedMeshApp::CreateRtvAndDsvDescriptorHeaps()
         &dsvHeapDesc, IID_PPV_ARGS(mDsvHeap.GetAddressOf())));
 }
  
-void SkinnedMeshApp::OnResize()
+void CarGameApp::OnResize()
 {
     D3DApp::OnResize();
 
@@ -117,7 +117,7 @@ void SkinnedMeshApp::OnResize()
     }
 }
 
-void SkinnedMeshApp::Update(const GameTimer& gt)
+void CarGameApp::Update(const GameTimer& gt)
 {
     OnKeyboardInput(gt);
 
@@ -151,7 +151,6 @@ void SkinnedMeshApp::Update(const GameTimer& gt)
  
 	AnimateMaterials(gt);
 	UpdateObjectCBs(gt);
-    UpdateSkinnedCBs(gt);
 	UpdateMaterialBuffer(gt);
     UpdateShadowTransform(gt);
 	UpdateMainPassCB(gt);
@@ -159,7 +158,7 @@ void SkinnedMeshApp::Update(const GameTimer& gt)
     UpdateSsaoCB(gt);
 }
 
-void SkinnedMeshApp::Draw(const GameTimer& gt)
+void CarGameApp::Draw(const GameTimer& gt)
 {
     auto cmdListAlloc = mCurrFrameResource->CmdListAlloc;
 
@@ -244,7 +243,10 @@ void SkinnedMeshApp::Draw(const GameTimer& gt)
     mCommandList->SetGraphicsRootDescriptorTable(4, skyTexDescriptor);
 
     mCommandList->SetPipelineState(mPSOs["opaque"].Get());
-    DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Opaque]);
+    DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::Opaque]);    
+    
+    mCommandList->SetPipelineState(mPSOs["pbrOpaque"].Get());
+    DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::PbrOpaque]);
 
     mCommandList->SetPipelineState(mPSOs["skinnedOpaque"].Get());
     DrawRenderItems(mCommandList.Get(), mRitemLayer[(int)RenderLayer::SkinnedOpaque]);
@@ -276,7 +278,7 @@ void SkinnedMeshApp::Draw(const GameTimer& gt)
     mCommandQueue->Signal(mFence.Get(), mCurrentFence);
 }
 
-void SkinnedMeshApp::OnMouseDown(WPARAM btnState, int x, int y)
+void CarGameApp::OnMouseDown(WPARAM btnState, int x, int y)
 {
     mLastMousePos.x = x;
     mLastMousePos.y = y;
@@ -284,12 +286,12 @@ void SkinnedMeshApp::OnMouseDown(WPARAM btnState, int x, int y)
     SetCapture(mhMainWnd);
 }
 
-void SkinnedMeshApp::OnMouseUp(WPARAM btnState, int x, int y)
+void CarGameApp::OnMouseUp(WPARAM btnState, int x, int y)
 {
     ReleaseCapture();
 }
 
-void SkinnedMeshApp::OnMouseMove(WPARAM btnState, int x, int y)
+void CarGameApp::OnMouseMove(WPARAM btnState, int x, int y)
 {
     if((btnState & MK_LBUTTON) != 0)
     {
@@ -305,12 +307,12 @@ void SkinnedMeshApp::OnMouseMove(WPARAM btnState, int x, int y)
     mLastMousePos.y = y;
 }
  
-void SkinnedMeshApp::AnimateMaterials(const GameTimer& gt)
+void CarGameApp::AnimateMaterials(const GameTimer& gt)
 {
 	
 }
 
-void SkinnedMeshApp::UpdateObjectCBs(const GameTimer& gt)
+void CarGameApp::UpdateObjectCBs(const GameTimer& gt)
 {
 	auto currObjectCB = mCurrFrameResource->ObjectCB.get();
 	for(auto& e : mAllRitems)
@@ -335,23 +337,7 @@ void SkinnedMeshApp::UpdateObjectCBs(const GameTimer& gt)
 	}
 }
 
-void SkinnedMeshApp::UpdateSkinnedCBs(const GameTimer& gt)
-{
-    auto currSkinnedCB = mCurrFrameResource->SkinnedCB.get();
-   
-    // We only have one skinned model being animated.
-    // mSkinnedModelInst->UpdateSkinnedAnimation(gt.DeltaTime());
-        
-    SkinnedConstants skinnedConstants;
-    std::copy(
-        std::begin(mSkinnedModelInst->FinalTransforms),
-        std::end(mSkinnedModelInst->FinalTransforms),
-        &skinnedConstants.BoneTransforms[0]);
-
-    currSkinnedCB->CopyData(0, skinnedConstants);
-}
- 
-void SkinnedMeshApp::UpdateMaterialBuffer(const GameTimer& gt)
+void CarGameApp::UpdateMaterialBuffer(const GameTimer& gt)
 {
 	auto currMaterialBuffer = mCurrFrameResource->MaterialBuffer.get();
 	for(auto& e : mMaterials)
@@ -379,7 +365,7 @@ void SkinnedMeshApp::UpdateMaterialBuffer(const GameTimer& gt)
 	}
 }
 
-void SkinnedMeshApp::UpdateShadowTransform(const GameTimer& gt)
+void CarGameApp::UpdateShadowTransform(const GameTimer& gt)
 {
     // Only the first "main" light casts a shadow.
     XMVECTOR lightDir = XMLoadFloat3(&mRotatedLightDirections[0]);
@@ -419,7 +405,7 @@ void SkinnedMeshApp::UpdateShadowTransform(const GameTimer& gt)
     XMStoreFloat4x4(&mShadowTransform, S);
 }
 
-void SkinnedMeshApp::UpdateMainPassCB(const GameTimer& gt)
+void CarGameApp::UpdateMainPassCB(const GameTimer& gt)
 {
 	XMMATRIX view = mCamera.GetView();
 	XMMATRIX proj = mCamera.GetProj();
@@ -466,7 +452,7 @@ void SkinnedMeshApp::UpdateMainPassCB(const GameTimer& gt)
 	currPassCB->CopyData(0, mMainPassCB);
 }
 
-void SkinnedMeshApp::UpdateShadowPassCB(const GameTimer& gt)
+void CarGameApp::UpdateShadowPassCB(const GameTimer& gt)
 {
     XMMATRIX view = XMLoadFloat4x4(&mLightView);
     XMMATRIX proj = XMLoadFloat4x4(&mLightProj);
@@ -495,7 +481,7 @@ void SkinnedMeshApp::UpdateShadowPassCB(const GameTimer& gt)
     currPassCB->CopyData(1, mShadowPassCB);
 }
 
-void SkinnedMeshApp::UpdateSsaoCB(const GameTimer& gt)
+void CarGameApp::UpdateSsaoCB(const GameTimer& gt)
 {
     SsaoConstants ssaoCB;
 
@@ -531,7 +517,7 @@ void SkinnedMeshApp::UpdateSsaoCB(const GameTimer& gt)
     currSsaoCB->CopyData(0, ssaoCB);
 }
 
-void SkinnedMeshApp::UpdateModelPos(const GameTimer& gt, bool bKeyW, bool bKeyS, bool bKeyA, bool bKeyD)
+void CarGameApp::UpdateModelPos(const GameTimer& gt, bool bKeyW, bool bKeyS, bool bKeyA, bool bKeyD)
 {
     if (!bModelCamera)
     {
@@ -553,11 +539,10 @@ void SkinnedMeshApp::UpdateModelPos(const GameTimer& gt, bool bKeyW, bool bKeyS,
         ThisModelItem->NumFramesDirty = gNumFrameResources;
     }
     
-    mSkinnedModelInst->bPlay = true;
-    // mSkinnedModelInst->TimePos = 0.0f;
+    // mSkinnedModelInst->bPlay = true;
 }
 
-void SkinnedMeshApp::LoadTextures()
+void CarGameApp::LoadTextures()
 {
 	std::vector<std::string> texNames = 
 	{
@@ -581,11 +566,14 @@ void SkinnedMeshApp::LoadTextures()
 		L"Textures/desertcube1024.dds"
 	};
 
-    // Add skinned model textures to list so we can reference by name later.
-    for(UINT i = 0; i < mSkinnedMats.size(); ++i)
+    // 加载PBR贴图，贴图相关名字放入mPbrTextureNames中
+    for(UINT i = 0; i < 1; ++i)
     {
-        std::string diffuseName = mSkinnedMats[i].DiffuseMapName;
-        // std::string normalName = mSkinnedMats[i].NormalMapName;
+        
+        std::string diffuseName = mCarModel.YModelPbrMaps[i].DiffuseMapName;
+        std::string metallicMapName = mCarModel.YModelPbrMaps[i].MetallicMapName;
+        std::string roughnessMapName = "sportcar.017_Body_Roughness.png";
+        std::string aoMapName = "sportcar.017_Body_AO.png";
 
         if (diffuseName.size() == 0)
         {
@@ -593,20 +581,31 @@ void SkinnedMeshApp::LoadTextures()
         }
 
         std::wstring diffuseFilename = L"Models/SpotCar/" + AnsiToWString(diffuseName);
-        // std::wstring diffuseFilename = L"Models/OpelCar/" + AnsiToWString(diffuseName);
-        //std::wstring normalFilename = L"../../Textures/" + AnsiToWString(normalName);
+        std::wstring metallicFilename = L"Models/SpotCar/" + AnsiToWString(metallicMapName);
+        std::wstring roughnessFilename = L"Models/SpotCar/" + AnsiToWString(roughnessMapName);
+        std::wstring aoFilename = L"Models/SpotCar/" + AnsiToWString(aoMapName);
 
         // strip off extension
         diffuseName = diffuseName.substr(0, diffuseName.find_last_of("."));
-        // normalName = normalName.substr(0, normalName.find_last_of("."));
+        metallicMapName = metallicMapName.substr(0, metallicMapName.find_last_of("."));
+        roughnessMapName = roughnessMapName.substr(0, roughnessMapName.find_last_of("."));
+        aoMapName = aoMapName.substr(0, aoMapName.find_last_of("."));
 
-        mSkinnedTextureNames.push_back(diffuseName);
+        mPbrTextureNames.push_back(diffuseName);
         texNames.push_back(diffuseName);
         texFilenames.push_back(diffuseFilename);
 
-        // mSkinnedTextureNames.push_back(normalName);
-        // texNames.push_back(normalName);
-        // texFilenames.push_back(normalFilename);
+        mPbrTextureNames.push_back(metallicMapName);
+        texNames.push_back(metallicMapName);
+        texFilenames.push_back(metallicFilename);
+        
+        mPbrTextureNames.push_back(roughnessMapName);
+        texNames.push_back(roughnessMapName);
+        texFilenames.push_back(roughnessFilename);
+        
+        mPbrTextureNames.push_back(aoMapName);
+        texNames.push_back(aoMapName);
+        texFilenames.push_back(aoFilename);
     }
 	
 	for(int i = 0; i < (int)texNames.size(); ++i)
@@ -636,22 +635,24 @@ void SkinnedMeshApp::LoadTextures()
 	}		
 }
 
-void SkinnedMeshApp::BuildRootSignature()
+void CarGameApp::BuildRootSignature()
 {
 	CD3DX12_DESCRIPTOR_RANGE texTable0;
+    // 3个SRV描述符，register t0 ~ t2，space 0，描述了三张贴图：gCubeMap、gShadowMap、gSsaoMap
 	texTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0, 0);
 
 	CD3DX12_DESCRIPTOR_RANGE texTable1;
+    // register t3开始，space 0，对应Common.hlsl的 Texture2D gTextureMaps[48]
 	texTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 48, 3, 0);
 
     // Root parameter can be a table, root descriptor or root constants.
     CD3DX12_ROOT_PARAMETER slotRootParameter[6];
 
 	// Perfomance TIP: Order from most frequent to least frequent.
-    slotRootParameter[0].InitAsConstantBufferView(0);
-    slotRootParameter[1].InitAsConstantBufferView(1);
-    slotRootParameter[2].InitAsConstantBufferView(2);
-    slotRootParameter[3].InitAsShaderResourceView(0, 1);
+    slotRootParameter[0].InitAsConstantBufferView(0); // register b0，对应 cbPerObject
+    slotRootParameter[1].InitAsConstantBufferView(1); // register b1，对应 cbSkinned
+    slotRootParameter[2].InitAsConstantBufferView(2); // register b2，对应 cbPass
+    slotRootParameter[3].InitAsShaderResourceView(0, 1); // register t0，space 1，对应 StructuredBuffer<MaterialData> gMaterialData
 	slotRootParameter[4].InitAsDescriptorTable(1, &texTable0, D3D12_SHADER_VISIBILITY_PIXEL);
 	slotRootParameter[5].InitAsDescriptorTable(1, &texTable1, D3D12_SHADER_VISIBILITY_PIXEL);
 
@@ -681,12 +682,14 @@ void SkinnedMeshApp::BuildRootSignature()
         IID_PPV_ARGS(mRootSignature.GetAddressOf())));
 }
 
-void SkinnedMeshApp::BuildSsaoRootSignature()
+void CarGameApp::BuildSsaoRootSignature()
 {
     CD3DX12_DESCRIPTOR_RANGE texTable0;
+    // 2个SRV描述符，register t0，space 0
     texTable0.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 2, 0, 0);
 
     CD3DX12_DESCRIPTOR_RANGE texTable1;
+    // 1个SRV描述符，register t2，space 0
     texTable1.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 2, 0);
 
     // Root parameter can be a table, root descriptor or root constants.
@@ -759,7 +762,7 @@ void SkinnedMeshApp::BuildSsaoRootSignature()
         IID_PPV_ARGS(mSsaoRootSignature.GetAddressOf())));
 }
 
-void SkinnedMeshApp::BuildDescriptorHeaps()
+void CarGameApp::BuildDescriptorHeaps()
 {
 	//
 	// Create the SRV heap.
@@ -773,8 +776,10 @@ void SkinnedMeshApp::BuildDescriptorHeaps()
 	//
 	// Fill out the heap with actual descriptors.
 	//
+    // 去拿该堆的CPU端首地址
 	CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(mSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
+    // 其他需要的贴图资源，存每张贴图对应的 ID3D12Resource
 	std::vector<ComPtr<ID3D12Resource>> tex2DList = 
 	{
 		mTextures["bricksDiffuseMap"]->Resource,
@@ -785,16 +790,17 @@ void SkinnedMeshApp::BuildDescriptorHeaps()
 		mTextures["defaultNormalMap"]->Resource
 	};
 
-    mSkinnedSrvHeapStart = (UINT)tex2DList.size();
+    // 记录Pbr的贴图对应的描述符在描述符堆的首地址，记录在对应材质信息中，为了将来在shader中索引
+    mPbrSrvHeapStart = (UINT)tex2DList.size();
 
-    for(UINT i = 0; i < (UINT)mSkinnedTextureNames.size(); ++i)
+    // Pbr所需要的几张贴图对应的 Resource 存入
+    for(UINT i = 0; i < (UINT)mPbrTextureNames.size(); ++i)
     {
-        auto texResource = mTextures[mSkinnedTextureNames[i]]->Resource;
+        auto texResource = mTextures[mPbrTextureNames[i]]->Resource;
         assert(texResource != nullptr);
         tex2DList.push_back(texResource);
     }
 	
-
 	auto skyCubeMap = mTextures["skyCubeMap"]->Resource;
 
 	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -803,13 +809,15 @@ void SkinnedMeshApp::BuildDescriptorHeaps()
 	srvDesc.Texture2D.MostDetailedMip = 0;
 	srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 	
+    // 真正根据Resource、srvDesc和hDescriptor去创建SRV
 	for(UINT i = 0; i < (UINT)tex2DList.size(); ++i)
 	{
 		srvDesc.Format = tex2DList[i]->GetDesc().Format;
 		srvDesc.Texture2D.MipLevels = tex2DList[i]->GetDesc().MipLevels;
 		md3dDevice->CreateShaderResourceView(tex2DList[i].Get(), &srvDesc, hDescriptor);
 
-		// next descriptor
+		// hDescriptor记录了创建的SRV在堆中的位置，这一步往后偏移一个单位
+        // mCbvSrvUavDescriptorSize在初始化的时候就通过md3dDevice->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);确定
 		hDescriptor.Offset(1, mCbvSrvUavDescriptorSize);
 	}
 	
@@ -858,7 +866,7 @@ void SkinnedMeshApp::BuildDescriptorHeaps()
         mRtvDescriptorSize);
 }
 
-void SkinnedMeshApp::BuildShadersAndInputLayout()
+void CarGameApp::BuildShadersAndInputLayout()
 {
 	const D3D_SHADER_MACRO alphaTestDefines[] =
 	{
@@ -872,6 +880,13 @@ void SkinnedMeshApp::BuildShadersAndInputLayout()
         NULL, NULL
     };
 
+    // PBR渲染宏定义
+    const D3D_SHADER_MACRO pbrDefines[] =
+    {
+        "PBR", "1",
+        NULL, NULL
+    };
+
 	mShaders["standardVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_1");
     mShaders["skinnedVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", skinnedDefines, "VS", "vs_5_1");
 	mShaders["opaquePS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "PS", "ps_5_1");
@@ -880,6 +895,9 @@ void SkinnedMeshApp::BuildShadersAndInputLayout()
     mShaders["skinnedShadowVS"] = d3dUtil::CompileShader(L"Shaders\\Shadows.hlsl", skinnedDefines, "VS", "vs_5_1");
     mShaders["shadowOpaquePS"] = d3dUtil::CompileShader(L"Shaders\\Shadows.hlsl", nullptr, "PS", "ps_5_1");
     mShaders["shadowAlphaTestedPS"] = d3dUtil::CompileShader(L"Shaders\\Shadows.hlsl", alphaTestDefines, "PS", "ps_5_1");
+
+    mShaders["PbrVS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", nullptr, "VS", "vs_5_1");
+    mShaders["PbrPS"] = d3dUtil::CompileShader(L"Shaders\\Default.hlsl", pbrDefines, "PS", "ps_5_1");
 
     mShaders["ssaoVS"] = d3dUtil::CompileShader(L"Shaders\\Ssao.hlsl", nullptr, "VS", "vs_5_1");
     mShaders["ssaoPS"] = d3dUtil::CompileShader(L"Shaders\\Ssao.hlsl", nullptr, "PS", "ps_5_1");
@@ -909,7 +927,7 @@ void SkinnedMeshApp::BuildShadersAndInputLayout()
     };
 }
 
-void SkinnedMeshApp::BuildShapeGeometry()
+void CarGameApp::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
 	GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
@@ -1056,68 +1074,19 @@ void SkinnedMeshApp::BuildShapeGeometry()
 	mGeometries[geo->Name] = std::move(geo);
 }
 
-void SkinnedMeshApp::LoadSkinnedModel()
+void CarGameApp::LoadSkinnedModel()
 {
-	//std::vector<SkinnedVertex> vertices;
-	//std::vector<std::uint16_t> indices;	
- 
-	//M3DLoader m3dLoader;
-	//m3dLoader.LoadM3d(mSkinnedModelFilename, vertices, indices, 
- //       mSkinnedSubsets, mSkinnedMats, mSkinnedInfo);
+    mCarModel.FileName = mCarModelFileName;
+    mCarModel.LoadModel();
+    mCarModel.LoadIntoMeshGeometries(mGeometries, mCarModelFileName, md3dDevice, mCommandList);
 
     FbxLoader fbxloader;
-    fbxloader.LoadFbx(mSkinnedModelFilename, mSkinnedInfo);
+    fbxloader.LoadFbx(mCarModelFileName);
 
-    std::vector<Vertex> vertices = fbxloader.FbxVertices;
-    std::vector<std::int32_t> indices = fbxloader.FbxIndices;
-    mSkinnedSubsets = fbxloader.FbxSubsets;
     mSkinnedMats = fbxloader.mats;
-
-    mSkinnedModelInst = std::make_unique<SkinnedModelInstance>();
-    mSkinnedModelInst->SkinnedInfo = &mSkinnedInfo;
-    mSkinnedModelInst->FinalTransforms.resize(mSkinnedInfo.BoneCount());
-    mSkinnedModelInst->ClipName = "Take1";
-    mSkinnedModelInst->TimePos = 0.0f;
- 
-	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
-    const UINT ibByteSize = (UINT)indices.size()  * sizeof(std::int32_t);
-
-	auto geo = std::make_unique<MeshGeometry>();
-	geo->Name = mSkinnedModelFilename;
-
-	ThrowIfFailed(D3DCreateBlob(vbByteSize, &geo->VertexBufferCPU));
-	CopyMemory(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
-
-	ThrowIfFailed(D3DCreateBlob(ibByteSize, &geo->IndexBufferCPU));
-	CopyMemory(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
-
-	geo->VertexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-		mCommandList.Get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
-
-	geo->IndexBufferGPU = d3dUtil::CreateDefaultBuffer(md3dDevice.Get(),
-		mCommandList.Get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
-
-	geo->VertexByteStride = sizeof(Vertex);
-	geo->VertexBufferByteSize = vbByteSize;
-	geo->IndexFormat = DXGI_FORMAT_R32_UINT;
-	geo->IndexBufferByteSize = ibByteSize;
-
-	for(UINT i = 0; i < (UINT)mSkinnedSubsets.size(); ++i)
-	{
-		SubmeshGeometry submesh;
-		std::string name = "sm_" + std::to_string(i);
-		
-        submesh.IndexCount = (UINT)mSkinnedSubsets[i].FaceCount * 3;
-        submesh.StartIndexLocation = mSkinnedSubsets[i].FaceStart * 3;
-        submesh.BaseVertexLocation = 0;
-
-		geo->DrawArgs[name] = submesh;
-	}
-
-	mGeometries[geo->Name] = std::move(geo);
 }
 
-void SkinnedMeshApp::BuildPSOs()
+void CarGameApp::BuildPSOs()
 {
     D3D12_GRAPHICS_PIPELINE_STATE_DESC opaquePsoDesc;
 
@@ -1148,6 +1117,22 @@ void SkinnedMeshApp::BuildPSOs()
 	opaquePsoDesc.SampleDesc.Quality = m4xMsaaState ? (m4xMsaaQuality - 1) : 0;
 	opaquePsoDesc.DSVFormat = mDepthStencilFormat;
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&opaquePsoDesc, IID_PPV_ARGS(&mPSOs["opaque"])));
+
+    //
+    // PSO for pbr pass.
+    //
+    D3D12_GRAPHICS_PIPELINE_STATE_DESC pbrPsoDesc = opaquePsoDesc;
+    pbrPsoDesc.VS =
+    {
+        reinterpret_cast<BYTE*>(mShaders["PbrVS"]->GetBufferPointer()),
+        mShaders["PbrVS"]->GetBufferSize()
+    };
+    pbrPsoDesc.PS =
+    {
+        reinterpret_cast<BYTE*>(mShaders["PbrPS"]->GetBufferPointer()),
+        mShaders["PbrPS"]->GetBufferSize()
+    };
+    ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&pbrPsoDesc, IID_PPV_ARGS(&mPSOs["pbrOpaque"])));
 
     //
     // PSO for skinned pass.
@@ -1273,7 +1258,7 @@ void SkinnedMeshApp::BuildPSOs()
 
 }
 
-void SkinnedMeshApp::BuildFrameResources()
+void CarGameApp::BuildFrameResources()
 {
     for(int i = 0; i < gNumFrameResources; ++i)
     {
@@ -1284,7 +1269,7 @@ void SkinnedMeshApp::BuildFrameResources()
     }
 }
 
-void SkinnedMeshApp::BuildMaterials()
+void CarGameApp::BuildMaterials()
 {
 	auto bricks0 = std::make_unique<Material>();
 	bricks0->Name = "bricks0";
@@ -1328,8 +1313,9 @@ void SkinnedMeshApp::BuildMaterials()
     mMaterials["sky"] = std::move(sky);
 
     UINT matCBIndex = 4;
-    UINT srvHeapIndex = mSkinnedSrvHeapStart;
-    for(UINT i = 0; i < mSkinnedMats.size(); ++i)
+    UINT srvHeapIndex = mPbrSrvHeapStart;
+    // mSkinnedMats.size()
+    for(UINT i = 0; i < 1; ++i)
     {
         auto mat = std::make_unique<Material>();
         mat->Name = mSkinnedMats[i].Name;
@@ -1344,7 +1330,7 @@ void SkinnedMeshApp::BuildMaterials()
     }
 }
 
-void SkinnedMeshApp::BuildRenderItems()
+void CarGameApp::BuildRenderItems()
 {
 	auto skyRitem = std::make_unique<RenderItem>();
 	XMStoreFloat4x4(&skyRitem->World, XMMatrixScaling(5000.0f, 5000.0f, 5000.0f));
@@ -1474,13 +1460,7 @@ void SkinnedMeshApp::BuildRenderItems()
 
         auto ritem = std::make_unique<RenderItem>();
 
-        // Reflect to change coordinate system from the RHS the data was exported out as.
-        //XMMATRIX modelScale = XMMatrixScaling(10.01f, 10.01f, -10.01f);
-        //XMMATRIX modelRot = XMMatrixRotationX(MathHelper::Pi / 2 * 3);
-        //XMMATRIX modelOffset = XMMatrixTranslation(0.0f, 0.0f, -28.0f);
-        //XMStoreFloat4x4(&ritem->World, modelScale*modelRot*modelOffset);
         XMStoreFloat4x4(&ritem->World, XMMatrixScaling(1.0f, 1.0f, 1.0f) * XMMatrixRotationX(MathHelper::Pi / 2) * XMMatrixTranslation(0.0f, 0.0f, -10.0f));
-        // ritem->World = MathHelper::Identity4x4();
 
         //if (i == mSkinnedMats.size() >> 2)
         //{
@@ -1496,7 +1476,7 @@ void SkinnedMeshApp::BuildRenderItems()
         ritem->TexTransform = MathHelper::Identity4x4();
         ritem->ObjCBIndex = objCBIndex++;
         ritem->Mat = mMaterials[mSkinnedMats[i].Name].get();
-        ritem->Geo = mGeometries[mSkinnedModelFilename].get();
+        ritem->Geo = mGeometries[mCarModelFileName].get();
         ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
         ritem->IndexCount = ritem->Geo->DrawArgs[submeshName].IndexCount;
         ritem->StartIndexLocation = ritem->Geo->DrawArgs[submeshName].StartIndexLocation;
@@ -1504,16 +1484,16 @@ void SkinnedMeshApp::BuildRenderItems()
 
         // All render items for this solider.m3d instance share
         // the same skinned model instance.
-        ritem->SkinnedCBIndex = 0;
-        ritem->SkinnedModelInst = mSkinnedModelInst.get();
+        //ritem->SkinnedCBIndex = 0;
+        //ritem->SkinnedModelInst = mSkinnedModelInst.get();
 
         // mRitemLayer[(int)RenderLayer::SkinnedOpaque].push_back(ritem.get());
-        mRitemLayer[(int)RenderLayer::Opaque].push_back(ritem.get());
+        mRitemLayer[(int)RenderLayer::PbrOpaque].push_back(ritem.get());
         mAllRitems.push_back(std::move(ritem));
     }
 }
 
-void SkinnedMeshApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems)
+void CarGameApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems)
 {
     UINT objCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(ObjectConstants));
     UINT skinnedCBByteSize = d3dUtil::CalcConstantBufferByteSize(sizeof(SkinnedConstants));
@@ -1548,7 +1528,7 @@ void SkinnedMeshApp::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const s
     }
 }
 
-void SkinnedMeshApp::DrawSceneToShadowMap()
+void CarGameApp::DrawSceneToShadowMap()
 {
     mCommandList->RSSetViewports(1, &mShadowMap->Viewport());
     mCommandList->RSSetScissorRects(1, &mShadowMap->ScissorRect());
@@ -1581,35 +1561,35 @@ void SkinnedMeshApp::DrawSceneToShadowMap()
         D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_GENERIC_READ));
 }
 
-CD3DX12_CPU_DESCRIPTOR_HANDLE SkinnedMeshApp::GetCpuSrv(int index)const
+CD3DX12_CPU_DESCRIPTOR_HANDLE CarGameApp::GetCpuSrv(int index)const
 {
     auto srv = CD3DX12_CPU_DESCRIPTOR_HANDLE(mSrvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
     srv.Offset(index, mCbvSrvUavDescriptorSize);
     return srv;
 }
 
-CD3DX12_GPU_DESCRIPTOR_HANDLE SkinnedMeshApp::GetGpuSrv(int index)const
+CD3DX12_GPU_DESCRIPTOR_HANDLE CarGameApp::GetGpuSrv(int index)const
 {
     auto srv = CD3DX12_GPU_DESCRIPTOR_HANDLE(mSrvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
     srv.Offset(index, mCbvSrvUavDescriptorSize);
     return srv;
 }
 
-CD3DX12_CPU_DESCRIPTOR_HANDLE SkinnedMeshApp::GetDsv(int index)const
+CD3DX12_CPU_DESCRIPTOR_HANDLE CarGameApp::GetDsv(int index)const
 {
     auto dsv = CD3DX12_CPU_DESCRIPTOR_HANDLE(mDsvHeap->GetCPUDescriptorHandleForHeapStart());
     dsv.Offset(index, mDsvDescriptorSize);
     return dsv;
 }
 
-CD3DX12_CPU_DESCRIPTOR_HANDLE SkinnedMeshApp::GetRtv(int index)const
+CD3DX12_CPU_DESCRIPTOR_HANDLE CarGameApp::GetRtv(int index)const
 {
     auto rtv = CD3DX12_CPU_DESCRIPTOR_HANDLE(mRtvHeap->GetCPUDescriptorHandleForHeapStart());
     rtv.Offset(index, mRtvDescriptorSize);
     return rtv;
 }
 
-void SkinnedMeshApp::OnKeyboardInput(const GameTimer& gt)
+void CarGameApp::OnKeyboardInput(const GameTimer& gt)
 {
     const float dt = gt.DeltaTime();
 
@@ -1639,7 +1619,7 @@ void SkinnedMeshApp::OnKeyboardInput(const GameTimer& gt)
     mCamera.UpdateViewMatrix();
 }
 
-void SkinnedMeshApp::SwitchCamera()
+void CarGameApp::SwitchCamera()
 {
     if (bModelCamera) // 如果之前是模型相机，那么这次切换变为普通相机
     {
@@ -1657,7 +1637,7 @@ void SkinnedMeshApp::SwitchCamera()
     else // 反之变为模型相机
     {
         mCamera.UnActive();
-        mCamera = mSkinnedModelInst->ModelCamera;
+        // mCamera = mSkinnedModelInst->ModelCamera;
         mCamera.Active();
         bModelCamera = true;
         Sleep(200);

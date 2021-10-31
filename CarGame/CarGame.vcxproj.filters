@@ -18,12 +18,12 @@
     <ClCompile Include="Src\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Src\SkinnedMeshApp.cpp">
+    <ClCompile Include="Src\CarGameApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Src\SkinnedMeshApp.h">
+    <ClInclude Include="Src\CarGameApp.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
