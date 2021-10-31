@@ -5,6 +5,7 @@
 #include "pch.h"
 #include "d3dApp.h"
 #include <WindowsX.h>
+#include "MacroDefines.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace std;
@@ -399,8 +400,15 @@ bool D3DApp::InitMainWindow()
 	int width  = R.right - R.left;
 	int height = R.bottom - R.top;
 
-	mhMainWnd = CreateWindow(L"MainWnd", mMainWndCaption.c_str(), 
-		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, mhAppInst, 0); 
+	// hbh，Create window
+	RECT rc = { 0, 0, (LONG)g_DisplayWidth, (LONG)g_DisplayHeight };
+	AdjustWindowRect(&rc, WS_OVERLAPPEDWINDOW, FALSE);
+
+	mhMainWnd = CreateWindow(L"MainWnd", mMainWndCaption.c_str(),
+		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, rc.right - rc.left, rc.bottom - rc.top, nullptr, nullptr, mhAppInst, nullptr);
+
+	//mhMainWnd = CreateWindow(L"MainWnd", mMainWndCaption.c_str(), 
+	//	WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, width, height, 0, 0, mhAppInst, 0); 
 	if( !mhMainWnd )
 	{
 		MessageBox(0, L"CreateWindow Failed.", 0, 0);
@@ -530,6 +538,9 @@ void D3DApp::CreateSwapChain()
 		mCommandQueue.Get(),
 		&sd, 
 		mSwapChain.GetAddressOf()));
+
+	// hbh，和窗口关联，取消 ALT+ENTER
+	ThrowIfFailed(mdxgiFactory->MakeWindowAssociation(MainWnd(), DXGI_MWA_NO_ALT_ENTER));
 }
 
 void D3DApp::FlushCommandQueue()

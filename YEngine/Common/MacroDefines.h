@@ -13,3 +13,6 @@
 #define _64MB _MB(64)
 #define _128MB _MB(128)
 #define _256MB _MB(256)
+
+#define g_DisplayWidth uint32_t(1920)
+#define g_DisplayHeight uint32_t(1080)
