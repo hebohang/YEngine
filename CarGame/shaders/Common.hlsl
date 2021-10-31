@@ -42,7 +42,6 @@ Texture2D gTextureMaps[48] : register(t3);
 // The texture array will occupy registers t0, t1, ..., t3 in space0. 
 StructuredBuffer<MaterialData> gMaterialData : register(t0, space1);
 
-
 SamplerState gsamPointWrap        : register(s0);
 SamplerState gsamPointClamp       : register(s1);
 SamplerState gsamLinearWrap       : register(s2);
@@ -152,4 +151,3 @@ float CalcShadowFactor(float4 shadowPosH)
     
     return percentLit / 9.0f;
 }
-

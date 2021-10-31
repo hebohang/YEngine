@@ -118,6 +118,42 @@ float4 PS(VertexOut pin) : SV_Target
     clip(diffuseAlbedo.a - 0.1f);
 #endif
 
+    // Only the first light casts a shadow.
+    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
+    shadowFactor[0] = CalcShadowFactor(pin.ShadowPosH);
+
+#ifdef PBR
+    float3 PbrColor = 0.f;
+
+    float3 N = normalize(pin.NormalW);
+    float3 V = normalize(gEyePosW - pin.PosW);
+    float3 F0 = float3(0.04f, 0.04f, 0.04f);
+    float3 gamma = float3(2.2f, 2.2f, 2.2f);
+    float3 albedo =  pow(gTextureMaps[diffuseMapIndex].Sample(gsamAnisotropicWrap, pin.TexC), gamma);
+    float metallic = gTextureMaps[diffuseMapIndex + 1].Sample(gsamAnisotropicWrap, pin.TexC).r;
+    float roughness_sample = gTextureMaps[diffuseMapIndex + 2].Sample(gsamAnisotropicWrap, pin.TexC).r;
+    float ao = gTextureMaps[diffuseMapIndex + 3].Sample(gsamAnisotropicWrap, pin.TexC).r;
+
+    // Vector from point being lit to eye. 
+    float3 toEyeW_Unit = normalize(gEyePosW - pin.PosW);
+
+    for (int i = 0; i < NUM_DIR_LIGHTS; i++)
+    {
+        float lightIntensity = gLights[i].Strength.r * 10.0f;
+        float3 toLight = normalize(-gLights[i].Direction);
+        float3 lightColor = gLights[i].Strength;
+
+        PbrColor += DirectPBR(lightIntensity, lightColor, toLight, N, toEyeW_Unit, roughness_sample, metallic, albedo, 1.0f);
+    }
+    float3 ambient_pbr = 0.03f * albedo * ao;
+    float3 totalColor = ambient_pbr + PbrColor;
+    totalColor = totalColor / (totalColor + float3(1.f, 1.f, 1.f));
+    totalColor = saturate(totalColor);
+    float3 gammaCorrect = pow(totalColor, 1.0 / 2.2);
+
+    return float4(gammaCorrect, 1.0f);
+#endif
+
 	// Interpolating normal can unnormalize it, so renormalize it.
     pin.NormalW = normalize(pin.NormalW);
 	
@@ -136,10 +172,6 @@ float4 PS(VertexOut pin) : SV_Target
 
     // Light terms.
     float4 ambient = ambientAccess*gAmbientLight*diffuseAlbedo;
-
-    // Only the first light casts a shadow.
-    float3 shadowFactor = float3(1.0f, 1.0f, 1.0f);
-    shadowFactor[0] = CalcShadowFactor(pin.ShadowPosH);
 
     const float shininess = (1.0f - roughness) * normalMapSample.a;
     Material mat = { diffuseAlbedo, fresnelR0, shininess };
