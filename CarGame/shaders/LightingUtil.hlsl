@@ -124,7 +124,6 @@ float3 DirectPBR(float lightIntensity, float3 lightColor, float3 toLight, float3
     float NdotL = max(dot(normal, toLight), 0.0);
 
     return (diffuseBRDF + specularBRDF) * NdotL * lightIntensity * lightColor.rgb * shadowAmount;
-    // return (specularBRDF) * NdotL * lightIntensity * lightColor.rgb * shadowAmount;
 }
 
 // 基于物理的 BlinnPhong
