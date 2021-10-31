@@ -517,31 +517,6 @@ void CarGameApp::UpdateSsaoCB(const GameTimer& gt)
     currSsaoCB->CopyData(0, ssaoCB);
 }
 
-void CarGameApp::UpdateModelPos(const GameTimer& gt, bool bKeyW, bool bKeyS, bool bKeyA, bool bKeyD)
-{
-    if (!bModelCamera)
-    {
-        return;
-    }
-    const float dt = gt.DeltaTime();
-
-    std::vector<RenderItem*> ModelItems = mRitemLayer[(int)RenderLayer::SkinnedOpaque];
-    for (unsigned int i = 0; i < ModelItems.size(); i++)
-    {
-        RenderItem* ThisModelItem = ModelItems[i];
-        XMMATRIX WorldMatrix = XMLoadFloat4x4(&ThisModelItem->World);
-        XMMATRIX TranslationMatrix = DirectX::XMMatrixTranslation(10.0f * dt * (bKeyA - bKeyD), 0.0f, 10.0f * dt * (bKeyS - bKeyW));
-        XMStoreFloat4x4(
-            &ThisModelItem->World,
-            XMMatrixMultiply(WorldMatrix, TranslationMatrix)
-        );
-
-        ThisModelItem->NumFramesDirty = gNumFrameResources;
-    }
-    
-    // mSkinnedModelInst->bPlay = true;
-}
-
 void CarGameApp::LoadTextures()
 {
 	std::vector<std::string> texNames = 
@@ -930,8 +905,9 @@ void CarGameApp::BuildShadersAndInputLayout()
 void CarGameApp::BuildShapeGeometry()
 {
     GeometryGenerator geoGen;
-	GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
-	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20.0f, 30.0f, 60, 40);
+	GeometryGenerator::MeshData box = geoGen.CreateBox(0.2f, 1.0f, 1000.0f, 3);
+	GeometryGenerator::MeshData box2 = geoGen.CreateBox(0.2f, 1.0f, 1000.0f, 3);
+	GeometryGenerator::MeshData grid = geoGen.CreateGrid(20000.0f, 30000.0f, 120, 80);
 	GeometryGenerator::MeshData sphere = geoGen.CreateSphere(0.5f, 20, 20);
 	GeometryGenerator::MeshData cylinder = geoGen.CreateCylinder(0.5f, 0.3f, 3.0f, 20, 20);
     GeometryGenerator::MeshData quad = geoGen.CreateQuad(0.0f, 0.0f, 1.0f, 1.0f, 0.0f);
@@ -947,6 +923,7 @@ void CarGameApp::BuildShapeGeometry()
 	UINT sphereVertexOffset = gridVertexOffset + (UINT)grid.Vertices.size();
 	UINT cylinderVertexOffset = sphereVertexOffset + (UINT)sphere.Vertices.size();
     UINT quadVertexOffset = cylinderVertexOffset + (UINT)cylinder.Vertices.size();
+    UINT box2VertexOffset = quadVertexOffset + (UINT)quad.Vertices.size();
 
 	// Cache the starting index for each object in the concatenated index buffer.
 	UINT boxIndexOffset = 0;
@@ -954,6 +931,7 @@ void CarGameApp::BuildShapeGeometry()
 	UINT sphereIndexOffset = gridIndexOffset + (UINT)grid.Indices32.size();
 	UINT cylinderIndexOffset = sphereIndexOffset + (UINT)sphere.Indices32.size();
     UINT quadIndexOffset = cylinderIndexOffset + (UINT)cylinder.Indices32.size();
+    UINT box2IndexOffset = quadIndexOffset + (UINT)quad.Indices32.size();
 
 	SubmeshGeometry boxSubmesh;
 	boxSubmesh.IndexCount = (UINT)box.Indices32.size();
@@ -980,6 +958,11 @@ void CarGameApp::BuildShapeGeometry()
     quadSubmesh.StartIndexLocation = quadIndexOffset;
     quadSubmesh.BaseVertexLocation = quadVertexOffset;
 
+    SubmeshGeometry box2Submesh;
+    box2Submesh.IndexCount = (UINT)box2.Indices32.size();
+    box2Submesh.StartIndexLocation = box2IndexOffset;
+    box2Submesh.BaseVertexLocation = box2VertexOffset;
+
 	//
 	// Extract the vertex elements we are interested in and pack the
 	// vertices of all the meshes into one vertex buffer.
@@ -990,14 +973,15 @@ void CarGameApp::BuildShapeGeometry()
 		grid.Vertices.size() +
 		sphere.Vertices.size() +
 		cylinder.Vertices.size() + 
-        quad.Vertices.size();
+        quad.Vertices.size() + 
+        box2.Vertices.size();
 
 	std::vector<Vertex> vertices(totalVertexCount);
 
 	UINT k = 0;
 	for(size_t i = 0; i < box.Vertices.size(); ++i, ++k)
 	{
-		vertices[k].Pos = box.Vertices[i].Position;
+        vertices[k].Pos = XMFLOAT3(box.Vertices[i].Position.x + 1.5f, box.Vertices[i].Position.y, box.Vertices[i].Position.z); // box.Vertices[i].Position;
 		vertices[k].Normal = box.Vertices[i].Normal;
 		vertices[k].TexC = box.Vertices[i].TexC;
 		vertices[k].TangentU = box.Vertices[i].TangentU;
@@ -1035,12 +1019,21 @@ void CarGameApp::BuildShapeGeometry()
         vertices[k].TangentU = quad.Vertices[i].TangentU;
     }
 
+    for (size_t i = 0; i < box2.Vertices.size(); ++i, ++k)
+    {
+        vertices[k].Pos = XMFLOAT3(box2.Vertices[i].Position.x - 1.5f, box2.Vertices[i].Position.y, box2.Vertices[i].Position.z);
+        vertices[k].Normal = box2.Vertices[i].Normal;
+        vertices[k].TexC = box2.Vertices[i].TexC;
+        vertices[k].TangentU = box2.Vertices[i].TangentU;
+    }
+
 	std::vector<std::uint16_t> indices;
 	indices.insert(indices.end(), std::begin(box.GetIndices16()), std::end(box.GetIndices16()));
 	indices.insert(indices.end(), std::begin(grid.GetIndices16()), std::end(grid.GetIndices16()));
 	indices.insert(indices.end(), std::begin(sphere.GetIndices16()), std::end(sphere.GetIndices16()));
 	indices.insert(indices.end(), std::begin(cylinder.GetIndices16()), std::end(cylinder.GetIndices16()));
     indices.insert(indices.end(), std::begin(quad.GetIndices16()), std::end(quad.GetIndices16()));
+    indices.insert(indices.end(), std::begin(box2.GetIndices16()), std::end(box2.GetIndices16()));
 
     const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
     const UINT ibByteSize = (UINT)indices.size()  * sizeof(std::uint16_t);
@@ -1070,6 +1063,7 @@ void CarGameApp::BuildShapeGeometry()
 	geo->DrawArgs["sphere"] = sphereSubmesh;
 	geo->DrawArgs["cylinder"] = cylinderSubmesh;
     geo->DrawArgs["quad"] = quadSubmesh;
+    geo->DrawArgs["box2"] = box2Submesh;
 
 	mGeometries[geo->Name] = std::move(geo);
 }
@@ -1129,8 +1123,8 @@ void CarGameApp::BuildPSOs()
     };
     pbrPsoDesc.PS =
     {
-        reinterpret_cast<BYTE*>(mShaders["PbrPS"]->GetBufferPointer()),
-        mShaders["PbrPS"]->GetBufferSize()
+        reinterpret_cast<BYTE*>(mShaders["opaquePS"]->GetBufferPointer()),
+        mShaders["opaquePS"]->GetBufferSize()
     };
     ThrowIfFailed(md3dDevice->CreateGraphicsPipelineState(&pbrPsoDesc, IID_PPV_ARGS(&mPSOs["pbrOpaque"])));
 
@@ -1390,18 +1384,18 @@ void CarGameApp::BuildRenderItems()
 
 	XMMATRIX brickTexTransform = XMMatrixScaling(1.5f, 2.0f, 1.0f);
 	UINT objCBIndex = 4;
-	for(int i = 0; i < 5; ++i)
+	for(int i = 0; i < 50; ++i)
 	{
 		auto leftCylRitem = std::make_unique<RenderItem>();
 		auto rightCylRitem = std::make_unique<RenderItem>();
 		auto leftSphereRitem = std::make_unique<RenderItem>();
 		auto rightSphereRitem = std::make_unique<RenderItem>();
 
-		XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f + i*5.0f);
-		XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f + i*5.0f);
+		XMMATRIX leftCylWorld = XMMatrixTranslation(-5.0f, 1.5f, -10.0f - i*5.0f);
+		XMMATRIX rightCylWorld = XMMatrixTranslation(+5.0f, 1.5f, -10.0f - i*5.0f);
 
-		XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f + i*5.0f);
-		XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f + i*5.0f);
+		XMMATRIX leftSphereWorld = XMMatrixTranslation(-5.0f, 3.5f, -10.0f - i*5.0f);
+		XMMATRIX rightSphereWorld = XMMatrixTranslation(+5.0f, 3.5f, -10.0f - i*5.0f);
 
 		XMStoreFloat4x4(&leftCylRitem->World, rightCylWorld);
 		XMStoreFloat4x4(&leftCylRitem->TexTransform, brickTexTransform);
@@ -1453,6 +1447,20 @@ void CarGameApp::BuildRenderItems()
 		mAllRitems.push_back(std::move(leftSphereRitem));
 		mAllRitems.push_back(std::move(rightSphereRitem));
 	}
+
+    auto box2Ritem = std::make_unique<RenderItem>();
+    XMStoreFloat4x4(&box2Ritem->World, XMMatrixScaling(2.0f, 1.0f, 2.0f) * XMMatrixTranslation(0.0f, 0.5f, 0.0f));
+    XMStoreFloat4x4(&box2Ritem->TexTransform, XMMatrixScaling(1.0f, 1.0f, 1.0f));
+    box2Ritem->ObjCBIndex = objCBIndex++;
+    box2Ritem->Mat = mMaterials["bricks0"].get();
+    box2Ritem->Geo = mGeometries["shapeGeo"].get();
+    box2Ritem->PrimitiveType = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+    box2Ritem->IndexCount = box2Ritem->Geo->DrawArgs["box2"].IndexCount;
+    box2Ritem->StartIndexLocation = box2Ritem->Geo->DrawArgs["box2"].StartIndexLocation;
+    box2Ritem->BaseVertexLocation = box2Ritem->Geo->DrawArgs["box2"].BaseVertexLocation;
+
+    mRitemLayer[(int)RenderLayer::Opaque].push_back(box2Ritem.get());
+    mAllRitems.push_back(std::move(box2Ritem));
 
     for(UINT i = 0; i < 1; ++i)
     {
@@ -1589,37 +1597,92 @@ CD3DX12_CPU_DESCRIPTOR_HANDLE CarGameApp::GetRtv(int index)const
     return rtv;
 }
 
+void CarGameApp::UpdateModelPos(const GameTimer& gt, bool bKeyW, bool bKeyS, bool bKeyA, bool bKeyD)
+{
+    if (!bModelCamera)
+    {
+        return;
+    }
+    const float dt = gt.DeltaTime();
+
+    std::vector<RenderItem*> ModelItems = mRitemLayer[(int)RenderLayer::PbrOpaque];
+    for (unsigned int i = 0; i < ModelItems.size(); i++)
+    {
+        RenderItem* ThisModelItem = ModelItems[i];
+        XMMATRIX WorldMatrix = XMLoadFloat4x4(&ThisModelItem->World);
+        XMMATRIX TranslationMatrix = DirectX::XMMatrixTranslation(10.0f * dt * (bKeyA - bKeyD), 0.0f, 10.0f * dt * (bKeyS - bKeyW));
+        XMStoreFloat4x4(
+            &ThisModelItem->World,
+            XMMatrixMultiply(WorldMatrix, TranslationMatrix)
+        );
+
+        ThisModelItem->NumFramesDirty = gNumFrameResources;
+    }
+
+    // mCamera.SetPosition(ModelItems[0]->World.m[3][0], ModelItems[0]->World.m[3][1] + 3.0f, ModelItems[0]->World.m[3][2] + 3.0f);
+    mCamera.LookAt(
+            XMFLOAT3(ModelItems[0]->World.m[3][0], ModelItems[0]->World.m[3][1] + 3.0f, ModelItems[0]->World.m[3][2] + 3.0f),
+            XMFLOAT3(ModelItems[0]->World.m[3][0], ModelItems[0]->World.m[3][1], ModelItems[0]->World.m[3][2] - 3.0f),
+            XMFLOAT3(0.0f, 1.0f, 0.0f)
+        );
+    // mSkinnedModelInst->bPlay = true;
+}
+
 void CarGameApp::OnKeyboardInput(const GameTimer& gt)
 {
     const float dt = gt.DeltaTime();
 
     if (GetAsyncKeyState('W') & 0x8000)
     {
-        mCamera.Walk(10.0f * dt);
-        UpdateModelPos(gt, 1, 0, 0, 0);
+        if (!bModelCamera)
+        {
+            mCamera.Walk(10.0f * dt);
+        }
+        else
+        {
+            UpdateModelPos(gt, 1, 0, 0, 0);
+        }
     }
     if (GetAsyncKeyState('S') & 0x8000)
     {
-        mCamera.Walk(-10.0f * dt);
-        UpdateModelPos(gt, 0, 1, 0, 0);
+        if (!bModelCamera)
+        {
+            mCamera.Walk(-10.0f * dt);
+        }
+        else
+        {
+            UpdateModelPos(gt, 0, 1, 0, 0);
+        }
     }
     if (GetAsyncKeyState('A') & 0x8000)
     {
-        mCamera.Strafe(-10.0f * dt);
-        UpdateModelPos(gt, 0, 0, 1, 0);
+        if (!bModelCamera)
+        {
+            mCamera.Strafe(-10.0f * dt);
+        }
+        else
+        {
+            UpdateModelPos(gt, 0, 0, 1, 0);
+        }    
     }
     if (GetAsyncKeyState('D') & 0x8000)
     {
-        mCamera.Strafe(10.0f * dt);
-        UpdateModelPos(gt, 0, 0, 0, 1);
+        if (!bModelCamera)
+        {
+            mCamera.Strafe(10.0f * dt);
+        }
+        else
+        {
+            UpdateModelPos(gt, 0, 0, 0, 1);
+        } 
     }
     if (GetAsyncKeyState(VK_TAB) & 0x8000)
-        SwitchCamera();
+        SwitchCamera(gt);
 
     mCamera.UpdateViewMatrix();
 }
 
-void CarGameApp::SwitchCamera()
+void CarGameApp::SwitchCamera(const GameTimer& gt)
 {
     if (bModelCamera) // 如果之前是模型相机，那么这次切换变为普通相机
     {
@@ -1640,6 +1703,7 @@ void CarGameApp::SwitchCamera()
         // mCamera = mSkinnedModelInst->ModelCamera;
         mCamera.Active();
         bModelCamera = true;
+        UpdateModelPos(gt, 1, 0, 0, 0);
         Sleep(200);
     }
 }
