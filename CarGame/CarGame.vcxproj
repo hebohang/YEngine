@@ -134,7 +134,7 @@
       <ConformanceMode>false</ConformanceMode>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
-      <AdditionalIncludeDirectories>$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core;$(SolutionDir)YEngine\src\LoadModel;$(SolutionDir)YEngine\src\Render;$(SolutionDir)CarGame\Src;$(SolutionDir)YEngine\src\Model;$(SolutionDir)Dependencies\Assimp\include</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)YEngine\Common;$(SolutionDir)YEngine\src\Math;$(SolutionDir)YEngine\src\Core;$(SolutionDir)YEngine\src\LoadModel;$(SolutionDir)YEngine\src\Render;$(SolutionDir)CarGame\Src;$(SolutionDir)YEngine\src\Model;$(SolutionDir)Dependencies\Assimp\include;$(SolutionDir)YEngine\src\Physics</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>

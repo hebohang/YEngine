@@ -45,6 +45,7 @@ private:
     void UpdateShadowPassCB(const GameTimer& gt);
     void UpdateSsaoCB(const GameTimer& gt);
     void UpdateModelPos(const GameTimer& gt, bool bKeyW, bool bKeyS, bool bKeyA, bool bKeyD);
+    bool UpdatePhysics(const GameTimer& gt, XMFLOAT3 ModelPosition);
 
     void LoadTextures();
     void BuildRootSignature();
@@ -57,6 +58,7 @@ private:
     void BuildFrameResources();
     void BuildMaterials();
     void BuildRenderItems();
+    void BuildPhysicsObject();
     void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, const std::vector<RenderItem*>& ritems);
     void DrawSceneToShadowMap();
     void SwitchCamera(const GameTimer& gt);

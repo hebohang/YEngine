@@ -7,6 +7,9 @@
 #include "LoadFbx.h"
 #include "WICTextureLoader12.h"
 #include "LoadTextureHelper.h"
+#include "physicsEngine.h"
+#include "YPlane.h"
+#include "YBoundingSphere.h"
 
 using Microsoft::WRL::ComPtr;
 using namespace DirectX;
@@ -67,6 +70,7 @@ bool CarGameApp::Initialize()
     BuildRenderItems();
     BuildFrameResources();
     BuildPSOs();
+    BuildPhysicsObject();
 
     mSsao->SetPSOs(mPSOs["ssao"].Get(), mPSOs["ssaoBlur"].Get());
 
@@ -1606,14 +1610,16 @@ void CarGameApp::UpdateModelPos(const GameTimer& gt, bool bKeyW, bool bKeyS, boo
     const float dt = gt.DeltaTime();
 
     std::vector<RenderItem*> ModelItems = mRitemLayer[(int)RenderLayer::PbrOpaque];
+    XMMATRIX OldWorldMatrix = XMLoadFloat4x4(&ModelItems[0]->World);
     for (unsigned int i = 0; i < ModelItems.size(); i++)
     {
         RenderItem* ThisModelItem = ModelItems[i];
         XMMATRIX WorldMatrix = XMLoadFloat4x4(&ThisModelItem->World);
-        XMMATRIX TranslationMatrix = DirectX::XMMatrixTranslation(10.0f * dt * (bKeyA - bKeyD), 0.0f, 10.0f * dt * (bKeyS - bKeyW));
+        XMMATRIX RotateMatrix = XMMatrixRotationRollPitchYaw(0.0f, 0.2f * dt * (bKeyD - bKeyA), 0.0f);
+        XMMATRIX TranslationMatrix = DirectX::XMMatrixTranslation(0.0f, 0.0f, 10.0f * dt * (bKeyS - bKeyW));
         XMStoreFloat4x4(
             &ThisModelItem->World,
-            XMMatrixMultiply(WorldMatrix, TranslationMatrix)
+            XMMatrixMultiply(WorldMatrix, RotateMatrix * TranslationMatrix)
         );
 
         ThisModelItem->NumFramesDirty = gNumFrameResources;
@@ -1626,6 +1632,15 @@ void CarGameApp::UpdateModelPos(const GameTimer& gt, bool bKeyW, bool bKeyS, boo
             XMFLOAT3(0.0f, 1.0f, 0.0f)
         );
     // mSkinnedModelInst->bPlay = true;
+
+    // 如果碰撞，就回到原始的world矩阵
+    if (UpdatePhysics(gt, XMFLOAT3(ModelItems[0]->World.m[3][0], ModelItems[0]->World.m[3][1], ModelItems[0]->World.m[3][2])))
+    {
+        XMStoreFloat4x4(
+            &ModelItems[0]->World,
+            OldWorldMatrix
+        );
+    }    
 }
 
 void CarGameApp::OnKeyboardInput(const GameTimer& gt)
@@ -1708,3 +1723,28 @@ void CarGameApp::SwitchCamera(const GameTimer& gt)
     }
 }
 
+// 一个简易物理引擎的实现
+void CarGameApp::BuildPhysicsObject()
+{
+    // 注册到物理引擎
+    // 下面注册了一个包围球包围car，和两个平面，分别为左边界与右边界
+    PhysicsEngine::Get().AddObject(
+        PhysicsObject(new YBoundingSphere(Math::Vector3(0.0f, 0.0f, 0.0f), 0.5f),
+        Math::Vector3(1.0f, 1.0f, 1.0f))
+    );
+    PhysicsEngine::Get().AddObject(
+        PhysicsObject(new YPlane(Math::Vector3(-1.0f, 0.0f, 0.0f), 2.5f),
+            Math::Vector3(1.0f, 1.0f, 1.0f))
+    );
+    PhysicsEngine::Get().AddObject(
+        PhysicsObject(new YPlane(Math::Vector3(1.0f, 0.0f, 0.0f), -2.5f),
+            Math::Vector3(1.0f, 1.0f, 1.0f))
+    );
+}
+
+bool CarGameApp::UpdatePhysics(const GameTimer& gt, XMFLOAT3 ModelPosition)
+{
+    ((YBoundingSphere*)&PhysicsEngine::Get().YGetObject(0).GetCollider())->SetCenter(Math::Vector3(ModelPosition));
+
+    return PhysicsEngine::Get().HandleCollisions();
+}
