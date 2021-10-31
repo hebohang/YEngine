@@ -51,6 +51,7 @@ enum class RenderLayer : int
 {
 	Opaque = 0,
 	SkinnedOpaque,
+	PbrOpaque,
 	Debug,
 	Sky,
 	Count

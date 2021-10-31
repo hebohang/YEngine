@@ -304,6 +304,15 @@ struct Texture
 	Microsoft::WRL::ComPtr<ID3D12Resource> UploadHeap = nullptr;
 };
 
+struct PbrMaps
+{
+    std::string Name;
+    std::string AOMapName;
+    std::string DiffuseMapName;
+    std::string MetallicMapName;
+    std::string RoughnessMapName;
+};
+
 #ifndef ThrowIfFailed
 #define ThrowIfFailed(x)                                              \
 {                                                                     \
