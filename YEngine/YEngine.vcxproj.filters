@@ -75,10 +75,10 @@
     <ClCompile Include="src\LoadModel\LoadFbx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Physics\aabb.cpp">
+    <ClCompile Include="src\Physics\YAABB.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Physics\boundingSphere.cpp">
+    <ClCompile Include="src\Physics\YBoundingSphere.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics\physicsEngine.cpp">
@@ -87,7 +87,7 @@
     <ClCompile Include="src\Physics\physicsObject.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Physics\plane.cpp">
+    <ClCompile Include="src\Physics\YPlane.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Physics\collider.cpp">
@@ -251,10 +251,10 @@
     <ClInclude Include="src\LoadModel\LoadFbx.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Physics\aabb.h">
+    <ClInclude Include="src\Physics\YAABB.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Physics\boundingSphere.h">
+    <ClInclude Include="src\Physics\YBoundingSphere.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics\intersectData.h">
@@ -266,7 +266,7 @@
     <ClInclude Include="src\Physics\physicsObject.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Physics\plane.h">
+    <ClInclude Include="src\Physics\YPlane.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\Physics\collider.h">

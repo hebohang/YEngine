@@ -16,37 +16,26 @@ public:
 		return instance;
 	}
 
-	void AddObject(const PhysicsObject& object);
+	void AddObject(PhysicsObject& object);
 
-	/**
-	 * Simulates the physics world for a certain period of time. Does not take
-	 * object interaction into accounter; if two objects run into each other,
-	 * they will pass through each other.
-	 *
-	 * If object interaction is desired, collision detection and response must
-	 * be performed after this.
-	 *
-	 * @param delta How much time to simulate.
-	 */
+	// 物理模拟，这一步我们是在游戏内部完成的，目前暂时没有用到
 	void Simulate(float delta);
 
-	/**
-	 * Finds all objects that have collided since the last step and updates
-	 * them to adjust for the collision.
-	 */
-	void HandleCollisions();
+	// 碰撞处理
+	// 还未完善，目前只处理了包围球与平面的碰撞
+	bool HandleCollisions();
 
 	//TODO: Temporary Getters
-	inline const PhysicsObject& GetObject(unsigned int index) const
+	inline PhysicsObject& YGetObject(unsigned int index)
 	{
 		return m_objects[index];
 	}
-	inline unsigned int GetNumObjects() const
+	inline unsigned int GetNumObjects()
 	{
 		return (unsigned int)m_objects.size();
 	}
 private:
-	/** All the objects being simulated by the PhysicsEngine. */
+	// 加入物理引擎，需要向m_objects数组注册
 	std::vector<PhysicsObject> m_objects;
 
 	PhysicsEngine() = default;

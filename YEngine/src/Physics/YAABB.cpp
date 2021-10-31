@@ -1,7 +1,7 @@
 #include "pch.h"
-#include "aabb.h"
+#include "YAABB.h"
 
-IntersectData AABB::IntersectAABB(const AABB& other) const
+IntersectData YAABB::IntersectAABB(const YAABB& other) const
 {
 	// 本质上就是在各个轴上判断有没有相交
 	// 通过你的左下角和我的右上角、以及我的左下角和你的右上角做差去判断
@@ -13,14 +13,6 @@ IntersectData AABB::IntersectAABB(const AABB& other) const
 
 	float maxDistance = distances.Max();
 
-	//If there is any distance between the two AABB's, then max distance will
-	//be greather than or equal to 0. If there is distance between the two
-	//AABBs, then they aren't intersecting.
-	//
-	//Therefore, if the AABBs are intersecting, then the distance between them
-	//must be less than zero.
-
-	//TODO: This might actually need to return the minDistance if they are 
-	//intersecting.
+	// 还未完全AABB的方法
 	return IntersectData(maxDistance < 0, distances);
 }

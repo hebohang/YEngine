@@ -18,7 +18,7 @@ void PhysicsObject::operator=(PhysicsObject other)
 
 PhysicsObject::~PhysicsObject()
 {
-	if (m_collider) delete m_collider;
+	// if (m_collider) delete m_collider;
 }
 
 
