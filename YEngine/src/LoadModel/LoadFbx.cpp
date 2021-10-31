@@ -1,7 +1,7 @@
 #include "pch.h"
 #include "LoadFbx.h"
 
-bool FbxLoader::LoadFbx(const std::string& filename, SkinnedData& skinInfo)
+bool FbxLoader::LoadFbx(const std::string& filename)
 {
 	Assimp::Importer importer;
 	const aiScene* scene = importer.ReadFile(filename.c_str(), aiProcess_Triangulate | aiProcess_ConvertToLeftHanded | aiProcess_GenNormals | aiProcess_FixInfacingNormals);
@@ -109,6 +109,39 @@ void FbxLoader::SetupMeshMaterial(const aiScene* scene, const aiMesh* mesh)
 {
 	// TODO
 	// just for test
+	PbrMaps pbr_material;
+	pbr_material.Name = "hbh" + std::to_string(SubsetId);
+
+	if (mesh->mMaterialIndex >= 0) {
+		aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+		aiString diffuseMapName;
+		aiString metallicMapName;
+		aiString roughnessMapName;
+		aiString aoMapName;
+		if (material->GetTextureCount(aiTextureType_DIFFUSE))
+		{
+			material->GetTexture(aiTextureType_DIFFUSE, 0, &diffuseMapName);
+			pbr_material.DiffuseMapName = diffuseMapName.C_Str();
+		}
+		if (material->GetTextureCount(aiTextureType_METALNESS))
+		{
+			material->GetTexture(aiTextureType_METALNESS, 0, &metallicMapName);
+			pbr_material.MetallicMapName = metallicMapName.C_Str();
+		}	
+		if (material->GetTextureCount(aiTextureType_DIFFUSE_ROUGHNESS))
+		{
+			material->GetTexture(aiTextureType_DIFFUSE_ROUGHNESS, 0, &roughnessMapName);
+			pbr_material.RoughnessMapName = roughnessMapName.C_Str();
+		}		
+		if (material->GetTextureCount(aiTextureType_AMBIENT_OCCLUSION))
+		{
+			material->GetTexture(aiTextureType_AMBIENT_OCCLUSION, 0, &aoMapName);
+			pbr_material.AOMapName = aoMapName.C_Str();
+		}
+	}
+
+	FbxPbrMaps.push_back(pbr_material);
+
 	FbxMaterial this_material;
 	this_material.Name = "hbh" + std::to_string(SubsetId);
 

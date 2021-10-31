@@ -3,14 +3,14 @@
 
 void CreateWICTextureFromFile12(_In_ ID3D12Device* device,
     _In_ ID3D12GraphicsCommandList* cmdList,
-    _In_z_ const wchar_t* szFileName,
+    _In_z_ const wchar_t* TextureFileName,
     _Out_ ComPtr<ID3D12Resource>& texture,
     _Out_ ComPtr<ID3D12Resource>& textureUploadHeap
 )
 {
-    std::unique_ptr<uint8_t[]> decodedData;
+    std::unique_ptr<uint8_t[]> wicData;
     D3D12_SUBRESOURCE_DATA subresource;
-    ThrowIfFailed(DirectX::LoadWICTextureFromFile(device, szFileName, texture.ReleaseAndGetAddressOf(), decodedData, subresource));
+    ThrowIfFailed(DirectX::LoadWICTextureFromFile(device, TextureFileName, texture.ReleaseAndGetAddressOf(), wicData, subresource));
 
     const UINT64 uploadBufferSize = GetRequiredIntermediateSize(texture.Get(), 0, 1);
 

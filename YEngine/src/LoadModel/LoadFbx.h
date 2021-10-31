@@ -41,15 +41,14 @@ public:
         std::string NormalMapName;
     };
 
-    bool LoadFbx(const std::string& filename,
-        SkinnedData& skinInfo);
+    bool LoadFbx(const std::string& filename);
 
     std::vector<FbxMaterial> mats;
     std::vector<FbxMesh> FbxMeshes;
     std::vector<Vertex> FbxVertices;
     std::vector<int32_t> FbxIndices;
     std::vector<Subset> FbxSubsets;
-    SkinnedData FbxSkinnedData;
+    std::vector<PbrMaps> FbxPbrMaps;
 
     int SubsetId = -1;
     int FbxFaceCount = 0;
